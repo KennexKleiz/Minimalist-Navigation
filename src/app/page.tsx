@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Search, Lock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Lock, ArrowRight, Sparkles, Globe, Zap } from 'lucide-react';
 import SiteCard from '@/components/SiteCard';
 import AIAssistant from '@/components/AIAssistant';
 import Navbar from '@/components/Navbar';
@@ -129,22 +129,33 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 selection:bg-primary/20">
       <Navbar title={config.title} categories={categories} />
 
       {/* Hero Section */}
-      <header className="relative overflow-hidden py-12 sm:py-16 border-b border-border/50">
+      <header className="relative overflow-hidden pt-20 pb-24 sm:pt-32 sm:pb-36">
+        {/* Dynamic Background */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-primary/10 via-purple-500/5 to-transparent rounded-[100%] blur-3xl opacity-60" />
+          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+        </div>
+
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-8"
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mb-10"
             >
-              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 border border-primary/20">
+                <Sparkles className="w-4 h-4" />
+                <span>探索数字世界的无限可能</span>
+              </div>
+              <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground/80 to-foreground/50">
                 {config.title}
               </h1>
-              <p className="text-base sm:text-lg text-muted-foreground">
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                 {config.subtitle}
               </p>
             </motion.div>
@@ -153,110 +164,149 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="max-w-2xl mx-auto"
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="max-w-2xl mx-auto relative group"
             >
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-purple-600/30 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
                 <input
                   type="text"
                   placeholder="搜索分类、板块或网站..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-12 rounded-full border border-border bg-card shadow-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                  className="w-full h-14 pl-14 pr-14 rounded-full border border-border/50 bg-background/80 backdrop-blur-xl shadow-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-lg placeholder:text-muted-foreground/60"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted rounded-full"
                   >
                     ✕
                   </button>
                 )}
               </div>
             </motion.div>
+
+            {/* Quick Tags */}
+            {!searchQuery && categories.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="mt-8 flex flex-wrap justify-center gap-2"
+              >
+                <span className="text-sm text-muted-foreground mr-2">热门分类:</span>
+                {categories.slice(0, 5).map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/category/${cat.id}`}
+                    className="text-sm px-3 py-1 rounded-full bg-muted/50 hover:bg-primary/10 hover:text-primary transition-colors border border-transparent hover:border-primary/20"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </motion.div>
+            )}
           </div>
         </div>
-
-        {/* Background decoration */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl -z-10" />
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pb-20">
+      <main className="container mx-auto px-4 pb-24">
         {searchQuery && filteredCategories.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg">未找到匹配的分类</p>
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <p className="text-muted-foreground text-lg font-medium">未找到匹配的分类</p>
             <p className="text-muted-foreground text-sm mt-2">试试其他关键词或清空搜索</p>
           </div>
         )}
 
         {/* 分类卡片网格 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredCategories.map((category, index) => {
+        <motion.div
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          {filteredCategories.map((category) => {
             const totalSites = category.sections.reduce((sum, section) => sum + section.sites.length, 0);
 
             return (
               <motion.div
                 key={category.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0 }
+                }}
               >
                 <Link
                   href={`/category/${category.id}`}
-                  className="block group"
+                  className="block group h-full"
                 >
-                  <div className="relative h-48 bg-card border border-border rounded-xl p-6 hover:shadow-lg hover:border-primary/50 transition-all duration-300 overflow-hidden">
+                  <div className="relative h-full bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 overflow-hidden group-hover:-translate-y-1">
                     {/* 背景装饰 */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110" />
 
                     {/* 内容 */}
-                    <div className="relative z-10 h-full flex flex-col">
+                    <div className="relative z-10 flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                          <Globe className="w-5 h-5" />
+                        </div>
+                        <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                          <Zap className="w-3 h-3" />
+                          {totalSites}
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                        {category.name}
+                      </h3>
+                      
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                          {category.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {category.sections.length} 个板块 · {totalSites} 个网站
-                        </p>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {category.sections.slice(0, 3).map((section) => (
+                            <span
+                              key={section.id}
+                              className={`text-xs px-2.5 py-1 rounded-md flex items-center gap-1 transition-colors ${
+                                section.isLocked
+                                  ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20'
+                                  : 'bg-muted/50 text-muted-foreground border border-border/50 group-hover:border-primary/20'
+                              }`}
+                            >
+                              {section.isLocked && <Lock className="w-3 h-3" />}
+                              {section.name}
+                            </span>
+                          ))}
+                          {category.sections.length > 3 && (
+                            <span className="text-xs px-2 py-1 rounded-md bg-muted/30 text-muted-foreground">
+                              +{category.sections.length - 3}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      {/* 板块预览 */}
-                      <div className="flex flex-wrap gap-2 mt-4">
-                        {category.sections.slice(0, 3).map((section) => (
-                          <span
-                            key={section.id}
-                            className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
-                              section.isLocked
-                                ? 'bg-yellow-50 text-yellow-600'
-                                : 'bg-muted text-muted-foreground'
-                            }`}
-                          >
-                            {section.isLocked && <Lock className="w-3 h-3" />}
-                            {section.name}
-                          </span>
-                        ))}
-                        {category.sections.length > 3 && (
-                          <span className="text-xs bg-muted px-2 py-1 rounded-full text-muted-foreground">
-                            +{category.sections.length - 3}
-                          </span>
-                        )}
+                      <div className="mt-6 flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                        进入分类 <ArrowRight className="w-4 h-4 ml-1" />
                       </div>
-                    </div>
-
-                    {/* 箭头图标 */}
-                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
                     </div>
                   </div>
                 </Link>
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
         {filteredCategories.length === 0 && !searchQuery && (
           <div className="text-center py-20">

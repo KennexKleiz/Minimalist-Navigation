@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Search, ArrowLeft, Lock, Hash } from 'lucide-react';
+import { Search, ArrowLeft, Lock, Hash, Sparkles, LayoutGrid } from 'lucide-react';
 import SiteCard from '@/components/SiteCard';
 import AIAssistant from '@/components/AIAssistant';
 import Navbar from '@/components/Navbar';
@@ -175,27 +175,34 @@ export default function CategoryPage() {
       <Navbar title={config.title} categories={allCategories} />
 
       {/* Hero Section */}
-      <header className="relative overflow-hidden py-10 sm:py-14 bg-gradient-to-b from-muted/30 to-background">
+      <header className="relative overflow-hidden py-12 sm:py-20">
+        {/* Dynamic Background */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-primary/10 via-purple-500/5 to-transparent rounded-[100%] blur-3xl opacity-60" />
+          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+        </div>
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6"
+              className="mb-8"
             >
-              <div className="flex items-center justify-center gap-2 mb-3 text-muted-foreground">
+              <div className="flex items-center justify-center gap-2 mb-4">
                 <Link
                   href="/"
-                  className="flex items-center gap-1 hover:text-primary transition-colors text-sm"
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all text-sm border border-transparent hover:border-primary/20"
                 >
-                  <ArrowLeft className="w-4 h-4" /> 返回首页
+                  <ArrowLeft className="w-3.5 h-3.5" /> 返回首页
                 </Link>
               </div>
-              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground mb-3">
+              <h1 className="text-4xl sm:text-6xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70">
                 {category.name}
               </h1>
-              <p className="text-base text-muted-foreground">
-                收录了 {category.sections.reduce((acc, sec) => acc + sec.sites.length, 0)} 个精选网站，助你高效探索
+              <p className="text-lg text-muted-foreground flex items-center justify-center gap-2">
+                <LayoutGrid className="w-4 h-4" />
+                收录了 <span className="text-primary font-semibold">{category.sections.reduce((acc, sec) => acc + sec.sites.length, 0)}</span> 个精选网站
               </p>
             </motion.div>
 
@@ -207,20 +214,20 @@ export default function CategoryPage() {
               className="max-w-xl mx-auto"
             >
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-purple-600/30 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
                   <input
                     type="text"
                     placeholder={`在 ${category.name} 中搜索...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-12 pl-10 pr-10 rounded-full border border-border bg-card shadow-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-base placeholder:text-muted-foreground/70"
+                    className="w-full h-14 pl-14 pr-14 rounded-full border border-border/50 bg-background/80 backdrop-blur-xl shadow-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-lg placeholder:text-muted-foreground/60"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted rounded-full"
+                      className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted rounded-full"
                     >
                       ✕
                     </button>
@@ -230,27 +237,21 @@ export default function CategoryPage() {
             </motion.div>
           </div>
         </div>
-
-        {/* Background decoration */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full overflow-hidden -z-10 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
-          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px]" />
-        </div>
       </header>
 
-      {/* Sticky Section Navigation */}
+      {/* Sticky Section Navigation (Mobile) */}
       {!searchQuery && filteredSections.length > 0 && (
-        <div className="sticky top-[60px] z-40 bg-background/80 backdrop-blur-md border-b border-border/50 shadow-sm">
+        <div className="lg:hidden sticky top-[60px] z-40 bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm">
           <div className="container mx-auto px-4">
-            <div className="flex items-center gap-1 overflow-x-auto py-3 no-scrollbar">
+            <div className="flex items-center gap-2 overflow-x-auto py-3 no-scrollbar">
               {filteredSections.map((section) => (
                 <button
                   key={section.id}
                   onClick={() => scrollToSection(section.id)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all border ${
                     activeSection === section.id
-                      ? 'bg-primary text-primary-foreground shadow-md'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
+                      : 'bg-transparent text-muted-foreground border-transparent hover:bg-muted hover:text-foreground'
                   }`}
                 >
                   {section.name}
@@ -270,49 +271,77 @@ export default function CategoryPage() {
           </div>
         )}
 
-        <div className="space-y-16">
-          {filteredSections.map((section) => (
-            <motion.section
-              id={`section-${section.id}`}
-              key={section.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.4 }}
-              className="scroll-mt-32"
-            >
-              <div className="flex items-center justify-between mb-6 pb-2 border-b border-border/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-1 h-6 bg-primary rounded-full"></div>
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* Left Sidebar Navigation (Desktop) */}
+          {!searchQuery && filteredSections.length > 0 && (
+            <aside className="hidden lg:block w-36 sticky top-24 shrink-0">
+              <div className="bg-card/30 border border-border/40 rounded-2xl p-2 backdrop-blur-sm">
+                <h3 className="text-xs font-semibold text-muted-foreground mb-2 text-center uppercase tracking-wider">
+                  板块导航
+                </h3>
+                <nav className="space-y-1">
+                  {filteredSections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => scrollToSection(section.id)}
+                      className={`w-full text-center px-2 py-2 rounded-lg text-sm font-medium transition-all block ${
+                        activeSection === section.id
+                          ? 'bg-primary/10 text-primary shadow-sm'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
+                    >
+                      {section.name}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </aside>
+          )}
+
+          {/* Right Content Area */}
+          <div className="flex-1 w-full space-y-12">
+            {filteredSections.map((section) => (
+              <motion.section
+                id={`section-${section.id}`}
+                key={section.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.4 }}
+                className="scroll-mt-32 bg-card/30 border border-border/40 rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-sm"
+              >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-1.5 h-8 bg-gradient-to-b from-primary to-purple-600 rounded-full shadow-sm"></div>
                   <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                     {section.name}
                   </h2>
                 </div>
                 {section.isLocked ? (
-                  <span className="text-xs bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full flex items-center gap-1.5 font-medium border border-yellow-100">
+                  <span className="text-xs bg-yellow-500/10 text-yellow-600 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium border border-yellow-500/20">
                     <Lock className="w-3.5 h-3.5" /> 密码保护
                   </span>
                 ) : (
-                  <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full font-medium">
+                  <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full font-medium border border-border/50">
                     {section.sites.length} 个站点
                   </span>
                 )}
               </div>
 
               {section.isLocked ? (
-                <div className="bg-gradient-to-br from-muted/50 to-background border border-border/60 rounded-2xl p-10 text-center shadow-sm">
-                  <div className="w-16 h-16 bg-background rounded-2xl shadow-sm border border-border/50 flex items-center justify-center mx-auto mb-6 rotate-3">
-                    <Lock className="w-8 h-8 text-muted-foreground/60" />
+                <div className="bg-gradient-to-br from-muted/30 to-background border border-border/50 rounded-2xl p-12 text-center">
+                  <div className="w-20 h-20 bg-background rounded-3xl shadow-sm border border-border/50 flex items-center justify-center mx-auto mb-6 rotate-3 group">
+                    <Lock className="w-10 h-10 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 text-foreground">该板块受密码保护</h3>
-                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                  <h3 className="text-xl font-semibold mb-3 text-foreground">该板块受密码保护</h3>
+                  <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
                     为了保护隐私或特定内容，该板块需要输入密码才能访问。
                   </p>
                   <button
                     onClick={() => setPasswordModal({ isOpen: true, sectionId: section.id, sectionName: section.name })}
-                    className="px-8 py-2.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 font-medium"
+                    className="px-8 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 font-medium flex items-center gap-2 mx-auto"
                   >
-                    输入访问密码
+                    <Lock className="w-4 h-4" /> 输入访问密码
                   </button>
                 </div>
               ) : (
@@ -322,8 +351,9 @@ export default function CategoryPage() {
                   ))}
                 </div>
               )}
-            </motion.section>
-          ))}
+              </motion.section>
+            ))}
+          </div>
         </div>
 
         {filteredSections.length === 0 && !searchQuery && (
