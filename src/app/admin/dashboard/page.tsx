@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { Plus, Trash2, Save, Sparkles, LogOut, Settings, Layout, Globe, Edit, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Save, Sparkles, LogOut, Settings, Layout, Globe, Edit, ExternalLink, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ToastContainer, ToastProps } from '@/components/Toast';
@@ -50,7 +50,7 @@ export default function Dashboard() {
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password'>('content');
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<'category' | 'section' | 'site' | null>(null);
+  const [modalType, setModalType] = useState<'category' | 'section' | 'site' | 'batch_import' | null>(null);
   const [modalData, setModalData] = useState<any>({});
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
@@ -210,7 +210,7 @@ export default function Dashboard() {
     }
   };
 
-  const openModal = (type: 'category' | 'section' | 'site', data: any = {}, editMode: boolean = false) => {
+  const openModal = (type: 'category' | 'section' | 'site' | 'batch_import', data: any = {}, editMode: boolean = false) => {
     setModalType(type);
     setModalData(data);
     setIsEditMode(editMode);
@@ -299,8 +299,28 @@ export default function Dashboard() {
             sectionId: modalData.sectionId,
             sortOrder: data.sortOrder ? parseInt(data.sortOrder as string) : undefined
           });
+        } else if (modalType === 'batch_import') {
+          const content = data.content as string;
+          const lines = content.split('\n').filter(line => line.trim());
+          const sites = lines.map(line => {
+            const [title, url, description, icon] = line.split('|').map(s => s.trim());
+            return { title, url, description, icon };
+          });
+
+          if (sites.length === 0) {
+            showToast('请输入有效的数据', 'warning');
+            return;
+          }
+
+          await axios.post('/api/sites/batch', {
+            sectionId: modalData.sectionId,
+            sites
+          });
+          showToast(`成功导入 ${sites.length} 个网站`, 'success');
         }
-        showToast('创建成功', 'success');
+        if (modalType !== 'batch_import') {
+          showToast('创建成功', 'success');
+        }
       }
       setModalOpen(false);
       setIsEditMode(false);
@@ -701,6 +721,13 @@ export default function Dashboard() {
                                 >
                                   <Sparkles className="w-3.5 h-3.5" /> AI 填充
                                 </button>
+                                <button
+                                  onClick={() => openModal('batch_import', { sectionId: section.id })}
+                                  className="text-xs flex items-center gap-1 text-blue-600 hover:bg-blue-50 px-2.5 py-1.5 rounded-md transition-colors font-medium"
+                                  title="批量导入"
+                                >
+                                  <FileText className="w-3.5 h-3.5" /> 批量导入
+                                </button>
                                 <div className="w-px h-4 bg-border mx-1" />
                                 <button
                                   onClick={() => openModal('section', section, true)}
@@ -788,6 +815,7 @@ export default function Dashboard() {
                   {modalType === 'category' && '新建分类'}
                   {modalType === 'section' && '新建版块'}
                   {modalType === 'site' && '新建网址'}
+                  {modalType === 'batch_import' && '批量导入网站'}
                 </>
               )}
             </h3>
@@ -910,6 +938,24 @@ export default function Dashboard() {
                     <p className="text-xs text-muted-foreground mt-1">支持远程 URL 或本地上传图片</p>
                   </div>
                 </>
+              )}
+              {modalType === 'batch_import' && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">批量导入数据</label>
+                  <div className="bg-muted/50 p-3 rounded-lg mb-3 text-xs text-muted-foreground space-y-1">
+                    <p className="font-medium text-foreground">格式说明：每行一条记录，使用竖线 | 分隔</p>
+                    <p>标题 | 链接 | 描述(选填) | 图标(选填)</p>
+                    <p className="mt-2 font-medium text-foreground">示例：</p>
+                    <p>Google | https://google.com | 全球最大搜索引擎</p>
+                    <p>GitHub | https://github.com | 开发者平台 | https://github.com/favicon.ico</p>
+                  </div>
+                  <textarea
+                    name="content"
+                    required
+                    className="w-full p-3 border border-border rounded-lg bg-background font-mono text-sm h-64"
+                    placeholder="在此粘贴数据..."
+                  />
+                </div>
               )}
               <div className="flex justify-end gap-2 mt-6">
                 <button
