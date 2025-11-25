@@ -53,10 +53,10 @@ export default function RankingsSection() {
   if (!rankings) return null;
 
   const lists = [
-    { title: '推荐榜', icon: ThumbsUp, data: rankings.recommended, color: 'text-red-500', bg: 'bg-red-500/10' },
-    { title: '点击榜', icon: Eye, data: rankings.popular, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { title: '新增榜', icon: Clock, data: rankings.newest, color: 'text-green-500', bg: 'bg-green-500/10' },
-    { title: '随机榜', icon: Shuffle, data: rankings.random, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { title: '推荐站点', icon: ThumbsUp, data: rankings.recommended, color: 'text-red-500', bg: 'bg-red-500/10' },
+    { title: '热门浏览', icon: Eye, data: rankings.popular, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { title: '最新收录', icon: Clock, data: rankings.newest, color: 'text-green-500', bg: 'bg-green-500/10' },
+    { title: '随机探索', icon: Shuffle, data: rankings.random, color: 'text-purple-500', bg: 'bg-purple-500/10' },
   ];
 
   return (
@@ -124,8 +124,8 @@ export default function RankingsSection() {
                 </div>
 
                 <div className="text-xs text-muted-foreground tabular-nums opacity-60 group-hover:opacity-100">
-                  {list.title === '推荐榜' && site.likes}
-                  {list.title === '点击榜' && site.views}
+                  {list.title === '推荐站点' && site.likes}
+                  {list.title === '热门浏览' && site.views}
                 </div>
               </a>
             ))}
