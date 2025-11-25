@@ -16,8 +16,11 @@ export async function GET() {
       orderBy: { sortOrder: 'asc' }
     });
 
-    // 2. Fetch all sites using raw query to ensure we get likes and views
-    const allSites: any[] = await prisma.$queryRaw`SELECT * FROM Site ORDER BY sortOrder ASC`;
+    // 2. Fetch all sites with tags
+    const allSites = await prisma.site.findMany({
+      orderBy: { sortOrder: 'asc' },
+      include: { tags: true }
+    });
 
     // 3. Check admin status
     const cookieStore = await cookies();

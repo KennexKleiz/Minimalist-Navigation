@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, url, sectionId, description, icon, sortOrder } = body;
+    const { title, url, sectionId, description, icon, sortOrder, badge, tagIds } = body;
 
     if (!title || !url || !sectionId) {
       return NextResponse.json({ error: 'Title, URL, and Section ID are required' }, { status: 400 });
@@ -28,6 +28,10 @@ export async function POST(request: Request) {
         description,
         icon,
         sortOrder: finalSortOrder,
+        badge: badge || null,
+        tags: tagIds ? {
+          connect: tagIds.map((id: number) => ({ id }))
+        } : undefined
       },
     });
 
@@ -43,7 +47,7 @@ export async function PUT(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const body = await request.json();
-    const { title, url, description, icon, sortOrder } = body;
+    const { title, url, description, icon, sortOrder, badge, tagIds } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Site ID is required' }, { status: 400 });
@@ -57,6 +61,10 @@ export async function PUT(request: Request) {
         description,
         icon,
         sortOrder: sortOrder !== undefined ? sortOrder : undefined,
+        badge: badge !== undefined ? badge : undefined,
+        tags: tagIds ? {
+          set: tagIds.map((id: number) => ({ id }))
+        } : undefined
       },
     });
 

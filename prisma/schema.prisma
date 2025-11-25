@@ -66,8 +66,19 @@ model Site {
   sectionId   Int
   section     Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   likesList   Like[]
+  badge       String?  // New field for corner badge text
+  tags        Tag[]    // Relation to Tags
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  color     String   @default("blue") // blue, green, red, yellow, purple, pink, indigo, gray
+  sites     Site[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Like {

@@ -3,12 +3,18 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { Plus, Trash2, Save, Sparkles, LogOut, Settings, Layout, Globe, Edit, ExternalLink, FileText } from 'lucide-react';
+import { Plus, Trash2, Save, Sparkles, LogOut, Settings, Layout, Globe, Edit, ExternalLink, FileText, Tag as TagIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ToastContainer, ToastProps } from '@/components/Toast';
 
 // Types (Simplified for brevity, ideally shared)
+interface Tag {
+  id: number;
+  name: string;
+  color: string;
+}
+
 interface Site {
   id?: number;
   title: string;
@@ -16,6 +22,8 @@ interface Site {
   description: string;
   icon: string;
   sortOrder?: number;
+  badge?: string;
+  tags?: Tag[];
 }
 
 interface Section {
@@ -35,6 +43,7 @@ interface Category {
 
 export default function Dashboard() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [config, setConfig] = useState({
     title: '',
     subtitle: '',
@@ -48,12 +57,13 @@ export default function Dashboard() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password' | 'tags'>('content');
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<'category' | 'section' | 'site' | 'batch_import' | null>(null);
+  const [modalType, setModalType] = useState<'category' | 'section' | 'site' | 'batch_import' | 'tag' | null>(null);
   const [modalData, setModalData] = useState<any>({});
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [toasts, setToasts] = useState<ToastProps[]>([]);
   const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
   const router = useRouter();
@@ -73,11 +83,13 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
-      const [catsRes, configRes] = await Promise.all([
+      const [catsRes, configRes, tagsRes] = await Promise.all([
         axios.get('/api/categories'),
-        axios.get('/api/config')
+        axios.get('/api/config'),
+        axios.get('/api/tags')
       ]);
       setCategories(catsRes.data);
+      setTags(tagsRes.data);
       if (catsRes.data.length > 0 && !selectedCategoryId) {
         setSelectedCategoryId(catsRes.data[0].id || null);
       }
@@ -210,10 +222,15 @@ export default function Dashboard() {
     }
   };
 
-  const openModal = (type: 'category' | 'section' | 'site' | 'batch_import', data: any = {}, editMode: boolean = false) => {
+  const openModal = (type: 'category' | 'section' | 'site' | 'batch_import' | 'tag', data: any = {}, editMode: boolean = false) => {
     setModalType(type);
     setModalData(data);
     setIsEditMode(editMode);
+    if (type === 'site' && data.tags) {
+      setSelectedTagIds(data.tags.map((t: Tag) => t.id));
+    } else {
+      setSelectedTagIds([]);
+    }
     setModalOpen(true);
   };
 
@@ -272,7 +289,14 @@ export default function Dashboard() {
             url: data.url,
             description: data.description,
             icon: data.icon,
-            sortOrder: parseInt(data.sortOrder as string)
+            sortOrder: parseInt(data.sortOrder as string),
+            badge: data.badge,
+            tagIds: selectedTagIds
+          });
+        } else if (modalType === 'tag') {
+          await axios.put(`/api/tags?id=${modalData.id}`, {
+            name: data.name,
+            color: data.color
           });
         }
         showToast('更新成功', 'success');
@@ -297,7 +321,14 @@ export default function Dashboard() {
             description: data.description,
             icon: data.icon,
             sectionId: modalData.sectionId,
-            sortOrder: data.sortOrder ? parseInt(data.sortOrder as string) : undefined
+            sortOrder: data.sortOrder ? parseInt(data.sortOrder as string) : undefined,
+            badge: data.badge,
+            tagIds: selectedTagIds
+          });
+        } else if (modalType === 'tag') {
+          await axios.post('/api/tags', {
+            name: data.name,
+            color: data.color
           });
         } else if (modalType === 'batch_import') {
           const content = data.content as string;
@@ -331,6 +362,12 @@ export default function Dashboard() {
     }
   };
 
+  const toggleTagSelection = (tagId: number) => {
+    setSelectedTagIds(prev =>
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
+    );
+  };
+
   if (isLoading) return <div className="min-h-screen flex items-center justify-center">加载中...</div>;
 
   return (
@@ -350,6 +387,14 @@ export default function Dashboard() {
             }`}
           >
             <Layout className="w-4 h-4" /> 内容管理
+          </button>
+          <button
+            onClick={() => setActiveTab('tags')}
+            className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'tags' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+            }`}
+          >
+            <TagIcon className="w-4 h-4" /> 标签管理
           </button>
           <button
             onClick={() => setActiveTab('settings')}
@@ -612,6 +657,54 @@ export default function Dashboard() {
               </button>
             </form>
           </div>
+        ) : activeTab === 'tags' ? (
+          <div className="max-w-4xl bg-card p-8 rounded-2xl border border-border shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">标签管理</h2>
+              <button
+                onClick={() => openModal('tag')}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
+              >
+                <Plus className="w-4 h-4" /> 新建标签
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {tags.map((tag) => (
+                <div key={tag.id} className="p-4 border border-border rounded-lg flex items-center justify-between bg-background">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full bg-${tag.color}-500`} style={{ backgroundColor: tag.color }} />
+                    <span className="font-medium">{tag.name}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => openModal('tag', tag, true)}
+                      className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (confirm('确定要删除这个标签吗？')) {
+                          await axios.delete(`/api/tags?id=${tag.id}`);
+                          showToast('删除成功', 'success');
+                          fetchData();
+                        }
+                      }}
+                      className="p-1.5 hover:bg-red-50 rounded-md text-muted-foreground hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {tags.length === 0 && (
+                <div className="col-span-full text-center py-12 text-muted-foreground bg-muted/10 rounded-xl border border-dashed border-border">
+                  <p>暂无标签，请点击右上角新建</p>
+                </div>
+              )}
+            </div>
+          </div>
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -809,6 +902,7 @@ export default function Dashboard() {
                   {modalType === 'category' && '编辑分类'}
                   {modalType === 'section' && '编辑版块'}
                   {modalType === 'site' && '编辑网址'}
+                  {modalType === 'tag' && '编辑标签'}
                 </>
               ) : (
                 <>
@@ -816,6 +910,7 @@ export default function Dashboard() {
                   {modalType === 'section' && '新建版块'}
                   {modalType === 'site' && '新建网址'}
                   {modalType === 'batch_import' && '批量导入网站'}
+                  {modalType === 'tag' && '新建标签'}
                 </>
               )}
             </h3>
@@ -936,6 +1031,67 @@ export default function Dashboard() {
                       </label>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">支持远程 URL 或本地上传图片</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">角标 (Badge)</label>
+                    <input
+                      name="badge"
+                      type="text"
+                      defaultValue={isEditMode ? modalData.badge : ''}
+                      placeholder="例如: Hot, New, 推荐"
+                      className="w-full p-2 border border-border rounded-lg bg-background"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">标签 (Tags)</label>
+                    <div className="flex flex-wrap gap-2 p-3 border border-border rounded-lg bg-background min-h-[3rem]">
+                      {tags.map(tag => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => toggleTagSelection(tag.id)}
+                          className={`px-2 py-1 rounded text-xs font-medium border transition-colors ${
+                            selectedTagIds.includes(tag.id)
+                              ? 'bg-primary/10 border-primary text-primary'
+                              : 'bg-muted border-transparent text-muted-foreground hover:bg-muted/80'
+                          }`}
+                        >
+                          {tag.name}
+                        </button>
+                      ))}
+                      {tags.length === 0 && <span className="text-xs text-muted-foreground">暂无可用标签，请先在标签管理中添加</span>}
+                    </div>
+                  </div>
+                </>
+              )}
+              {modalType === 'tag' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">标签名称</label>
+                    <input
+                      name="name"
+                      required
+                      defaultValue={isEditMode ? modalData.name : ''}
+                      className="w-full p-2 border border-border rounded-lg bg-background"
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">颜色</label>
+                    <select
+                      name="color"
+                      defaultValue={isEditMode ? modalData.color : 'blue'}
+                      className="w-full p-2 border border-border rounded-lg bg-background"
+                    >
+                      <option value="blue">蓝色</option>
+                      <option value="green">绿色</option>
+                      <option value="red">红色</option>
+                      <option value="yellow">黄色</option>
+                      <option value="purple">紫色</option>
+                      <option value="pink">粉色</option>
+                      <option value="indigo">靛青</option>
+                      <option value="gray">灰色</option>
+                    </select>
                   </div>
                 </>
               )}
