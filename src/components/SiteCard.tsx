@@ -83,7 +83,7 @@ export default function SiteCard({
       {/* 背景光晕 */}
       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-all duration-500 group-hover:bg-primary/10" />
       
-      <div className="flex items-start gap-4 relative z-10 w-full mb-3">
+      <div className="flex items-start gap-4 relative z-10 w-full">
         {/* 左侧图标 - 始终保持白色背景以适配各种图标 */}
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-white p-2.5 shadow-sm ring-1 ring-border/10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
           {icon ? (

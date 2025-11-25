@@ -49,6 +49,7 @@ export default function Home() {
   const [currentBg, setCurrentBg] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
+  const [filteredSites, setFilteredSites] = useState<Site[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [passwordModal, setPasswordModal] = useState<{ isOpen: boolean; sectionId: number; sectionName: string }>({
     isOpen: false,
@@ -112,37 +113,48 @@ export default function Home() {
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredCategories(categories);
+      setFilteredSites([]);
       return;
     }
 
     const query = searchQuery.toLowerCase();
-    const filtered = categories.filter(category => {
-      // 搜索分类名称
-      if (category.name.toLowerCase().includes(query)) {
-        return true;
-      }
-
-      // 搜索板块名称
+    
+    // 1. 过滤分类（用于保留原有逻辑，虽然可能不再直接渲染）
+    const filteredCats = categories.filter(category => {
+      if (category.name.toLowerCase().includes(query)) return true;
       const hasMatchingSection = category.sections.some(section =>
         section.name.toLowerCase().includes(query)
       );
-      if (hasMatchingSection) {
-        return true;
-      }
-
-      // 搜索网站标题、描述或URL
-      const hasMatchingSite = category.sections.some(section =>
+      if (hasMatchingSection) return true;
+      return category.sections.some(section =>
         section.sites.some(site =>
           site.title.toLowerCase().includes(query) ||
           site.description?.toLowerCase().includes(query) ||
           site.url.toLowerCase().includes(query)
         )
       );
-
-      return hasMatchingSite;
     });
+    setFilteredCategories(filteredCats);
 
-    setFilteredCategories(filtered);
+    // 2. 收集所有匹配的站点（用于直接展示）
+    const sites: Site[] = [];
+    categories.forEach(category => {
+      category.sections.forEach(section => {
+        // 跳过密码保护的板块，保护隐私
+        if (section.isLocked) return;
+
+        section.sites.forEach(site => {
+          if (
+            site.title.toLowerCase().includes(query) ||
+            (site.description && site.description.toLowerCase().includes(query)) ||
+            site.url.toLowerCase().includes(query)
+          ) {
+            sites.push(site);
+          }
+        });
+      });
+    });
+    setFilteredSites(sites);
   }, [searchQuery, categories]);
 
   if (isLoading) {
@@ -250,105 +262,139 @@ export default function Home() {
         {/* 排行榜区域 - 仅在未搜索时显示 */}
         {!searchQuery && <RankingsSection />}
 
-        {searchQuery && filteredCategories.length === 0 && (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground text-lg font-medium">未找到匹配的分类</p>
-            <p className="text-muted-foreground text-sm mt-2">试试其他关键词或清空搜索</p>
-          </div>
-        )}
 
-        {/* 分类卡片网格 */}
-        <motion.div
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.1
-              }
-            }
-          }}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-        >
-          {filteredCategories.map((category) => {
-            const totalSites = category.sections.reduce((sum, section) => sum + section.sites.length, 0);
-
-            return (
+        {/* 搜索结果展示 */}
+        {searchQuery ? (
+          <>
+            {filteredSites.length > 0 ? (
               <motion.div
-                key={category.id}
                 variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0 }
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.05 }
+                  }
                 }}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               >
-                <Link
-                  href={`/category/${category.id}`}
-                  className="block group h-full"
-                >
-                  <div className="relative h-full bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 overflow-hidden group-hover:-translate-y-1">
-                    {/* 背景装饰 */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110" />
-
-                    {/* 内容 */}
-                    <div className="relative z-10 flex flex-col h-full">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                          <Globe className="w-5 h-5" />
-                        </div>
-                        <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
-                          <Zap className="w-3 h-3" />
-                          {totalSites}
-                        </div>
-                      </div>
-
-                      <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
-                        {category.name}
-                      </h3>
-                      
-                      <div className="flex-1">
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {category.sections.slice(0, 3).map((section) => (
-                            <span
-                              key={section.id}
-                              className={`text-xs px-2.5 py-1 rounded-md flex items-center gap-1 transition-colors ${
-                                section.isLocked
-                                  ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20'
-                                  : 'bg-muted/50 text-muted-foreground border border-border/50 group-hover:border-primary/20'
-                              }`}
-                            >
-                              {section.isLocked && <Lock className="w-3 h-3" />}
-                              {section.name}
-                            </span>
-                          ))}
-                          {category.sections.length > 3 && (
-                            <span className="text-xs px-2 py-1 rounded-md bg-muted/30 text-muted-foreground">
-                              +{category.sections.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-6 flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                        进入分类 <ArrowRight className="w-4 h-4 ml-1" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                {filteredSites.map((site) => (
+                  <motion.div
+                    key={site.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      show: { opacity: 1, y: 0 }
+                    }}
+                  >
+                    <SiteCard
+                      {...site}
+                      truncateDescription={true} // 搜索结果默认截断
+                    />
+                  </motion.div>
+                ))}
               </motion.div>
-            );
-          })}
-        </motion.div>
+            ) : (
+              <div className="text-center py-20">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground text-lg font-medium">未找到匹配的网站</p>
+                <p className="text-muted-foreground text-sm mt-2">试试其他关键词</p>
+              </div>
+            )}
+          </>
+        ) : (
+          /* 默认分类展示 */
+          <>
+            <motion.div
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.1 }
+                }
+              }}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              {categories.map((category) => {
+                const totalSites = category.sections.reduce((sum, section) => sum + section.sites.length, 0);
 
-        {filteredCategories.length === 0 && !searchQuery && (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg">暂无分类</p>
-            <p className="text-muted-foreground text-sm mt-2">请联系管理员添加分类</p>
-          </div>
+                return (
+                  <motion.div
+                    key={category.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      show: { opacity: 1, y: 0 }
+                    }}
+                  >
+                    <Link
+                      href={`/category/${category.id}`}
+                      className="block group h-full"
+                    >
+                      <div className="relative h-full bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 overflow-hidden group-hover:-translate-y-1">
+                        {/* 背景装饰 */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110" />
+
+                        {/* 内容 */}
+                        <div className="relative z-10 flex flex-col h-full">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                              <Globe className="w-5 h-5" />
+                            </div>
+                            <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                              <Zap className="w-3 h-3" />
+                              {totalSites}
+                            </div>
+                          </div>
+
+                          <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                            {category.name}
+                          </h3>
+                          
+                          <div className="flex-1">
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {category.sections.slice(0, 3).map((section) => (
+                                <span
+                                  key={section.id}
+                                  className={`text-xs px-2.5 py-1 rounded-md flex items-center gap-1 transition-colors ${
+                                    section.isLocked
+                                      ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20'
+                                      : 'bg-muted/50 text-muted-foreground border border-border/50 group-hover:border-primary/20'
+                                  }`}
+                                >
+                                  {section.isLocked && <Lock className="w-3 h-3" />}
+                                  {section.name}
+                                </span>
+                              ))}
+                              {category.sections.length > 3 && (
+                                <span className="text-xs px-2 py-1 rounded-md bg-muted/30 text-muted-foreground">
+                                  +{category.sections.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="mt-6 flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                            进入分类 <ArrowRight className="w-4 h-4 ml-1" />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+
+            {categories.length === 0 && (
+              <div className="text-center py-20">
+                <p className="text-muted-foreground text-lg">暂无分类</p>
+                <p className="text-muted-foreground text-sm mt-2">请联系管理员添加分类</p>
+              </div>
+            )}
+          </>
         )}
       </main>
 

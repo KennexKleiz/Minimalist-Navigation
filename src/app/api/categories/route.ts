@@ -63,10 +63,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, sortOrder } = body;
 
+    // 如果未提供 sortOrder，自动计算下一个序号
+    let finalSortOrder = sortOrder;
+    if (finalSortOrder === undefined || finalSortOrder === null) {
+      const lastCategory = await prisma.category.findFirst({
+        orderBy: { sortOrder: 'desc' },
+      });
+      finalSortOrder = (lastCategory?.sortOrder || 0) + 1;
+    }
+
     const category = await prisma.category.create({
       data: {
         name,
-        sortOrder: sortOrder || 0,
+        sortOrder: finalSortOrder,
       },
     });
 

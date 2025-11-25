@@ -15,6 +15,7 @@ interface Site {
   url: string;
   description: string;
   icon: string;
+  sortOrder?: number;
 }
 
 interface Section {
@@ -22,12 +23,14 @@ interface Section {
   name: string;
   sites: Site[];
   password?: string | null;
+  sortOrder?: number;
 }
 
 interface Category {
   id?: number;
   name: string;
   sections: Section[];
+  sortOrder?: number;
 }
 
 export default function Dashboard() {
@@ -253,10 +256,14 @@ export default function Dashboard() {
       if (isEditMode) {
         // 编辑模式
         if (modalType === 'category') {
-          await axios.put(`/api/categories?id=${modalData.id}`, { name: data.name });
+          await axios.put(`/api/categories?id=${modalData.id}`, {
+            name: data.name,
+            sortOrder: parseInt(data.sortOrder as string)
+          });
         } else if (modalType === 'section') {
           await axios.put(`/api/sections?id=${modalData.id}`, {
             name: data.name,
+            sortOrder: parseInt(data.sortOrder as string),
             password: data.password || null // 如果为空字符串，则清除密码
           });
         } else if (modalType === 'site') {
@@ -264,18 +271,23 @@ export default function Dashboard() {
             title: data.title,
             url: data.url,
             description: data.description,
-            icon: data.icon
+            icon: data.icon,
+            sortOrder: parseInt(data.sortOrder as string)
           });
         }
         showToast('更新成功', 'success');
       } else {
         // 新建模式
         if (modalType === 'category') {
-          await axios.post('/api/categories', { name: data.name });
+          await axios.post('/api/categories', {
+            name: data.name,
+            sortOrder: data.sortOrder ? parseInt(data.sortOrder as string) : undefined
+          });
         } else if (modalType === 'section') {
           await axios.post('/api/sections', {
             name: data.name,
             categoryId: modalData.categoryId,
+            sortOrder: data.sortOrder ? parseInt(data.sortOrder as string) : undefined,
             password: data.password || null
           });
         } else if (modalType === 'site') {
@@ -284,7 +296,8 @@ export default function Dashboard() {
             url: data.url,
             description: data.description,
             icon: data.icon,
-            sectionId: modalData.sectionId
+            sectionId: modalData.sectionId,
+            sortOrder: data.sortOrder ? parseInt(data.sortOrder as string) : undefined
           });
         }
         showToast('创建成功', 'success');
@@ -662,6 +675,9 @@ export default function Dashboard() {
                             <div className="flex items-center justify-between mb-5">
                               <div className="flex items-center gap-3">
                                 <span className="font-bold text-base">{section.name}</span>
+                                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-border/50">
+                                  排序: {section.sortOrder}
+                                </span>
                                 <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full border border-border/50">
                                   {section.sites.length} 个站点
                                 </span>
@@ -710,7 +726,12 @@ export default function Dashboard() {
                                     {site.icon ? <img src={site.icon} className="w-full h-full object-contain" /> : <Globe className="w-5 h-5 text-muted-foreground/50" />}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-medium truncate text-foreground">{site.title}</div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="text-sm font-medium truncate text-foreground">{site.title}</div>
+                                      <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border/50">
+                                        #{site.sortOrder}
+                                      </span>
+                                    </div>
                                     <div className="text-xs text-muted-foreground truncate opacity-70">{site.url}</div>
                                   </div>
                                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -783,30 +804,68 @@ export default function Dashboard() {
                   />
                 </div>
               )}
-              {modalType === 'section' && (
+              {modalType === 'category' && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">访问密码（可选）</label>
+                  <label className="block text-sm font-medium mb-1">排序权重</label>
                   <input
-                    name="password"
-                    type="text"
-                    placeholder="留空则不设置密码"
-                    defaultValue={isEditMode ? modalData.password : ''}
+                    name="sortOrder"
+                    type="number"
+                    defaultValue={isEditMode ? modalData.sortOrder : ''}
+                    placeholder="留空自动递增"
                     className="w-full p-2 border border-border rounded-lg bg-background"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">设置密码后，前台访问该板块需要输入密码</p>
+                  <p className="text-xs text-muted-foreground mt-1">数字越小越靠前，留空则自动递增</p>
                 </div>
+              )}
+              {modalType === 'section' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">排序权重</label>
+                    <input
+                      name="sortOrder"
+                      type="number"
+                      defaultValue={isEditMode ? modalData.sortOrder : ''}
+                      placeholder="留空自动递增"
+                      className="w-full p-2 border border-border rounded-lg bg-background"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">数字越小越靠前，留空则自动递增</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">访问密码（可选）</label>
+                    <input
+                      name="password"
+                      type="text"
+                      placeholder="留空则不设置密码"
+                      defaultValue={isEditMode ? modalData.password : ''}
+                      className="w-full p-2 border border-border rounded-lg bg-background"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">设置密码后，前台访问该板块需要输入密码</p>
+                  </div>
+                </>
               )}
               {modalType === 'site' && (
                 <>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">标题</label>
-                    <input
-                      name="title"
-                      required
-                      defaultValue={isEditMode ? modalData.title : ''}
-                      className="w-full p-2 border border-border rounded-lg bg-background"
-                      autoFocus
-                    />
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium mb-1">标题</label>
+                      <input
+                        name="title"
+                        required
+                        defaultValue={isEditMode ? modalData.title : ''}
+                        className="w-full p-2 border border-border rounded-lg bg-background"
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">排序</label>
+                      <input
+                        name="sortOrder"
+                        type="number"
+                        defaultValue={isEditMode ? modalData.sortOrder : ''}
+                        placeholder="自动"
+                        className="w-full p-2 border border-border rounded-lg bg-background"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">链接</label>

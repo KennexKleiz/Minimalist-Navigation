@@ -10,12 +10,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name and Category ID are required' }, { status: 400 });
     }
 
+    // 如果未提供 sortOrder，自动计算下一个序号
+    let finalSortOrder = sortOrder;
+    if (finalSortOrder === undefined || finalSortOrder === null) {
+      const lastSection = await prisma.section.findFirst({
+        where: { categoryId: parseInt(categoryId) },
+        orderBy: { sortOrder: 'desc' },
+      });
+      finalSortOrder = (lastSection?.sortOrder || 0) + 1;
+    }
+
     const section = await prisma.section.create({
       data: {
         name,
         categoryId: parseInt(categoryId),
         icon,
-        sortOrder: sortOrder || 0,
+        sortOrder: finalSortOrder,
         password: password || null,
       },
     });

@@ -10,6 +10,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Title, URL, and Section ID are required' }, { status: 400 });
     }
 
+    // 如果未提供 sortOrder，自动计算下一个序号
+    let finalSortOrder = sortOrder;
+    if (finalSortOrder === undefined || finalSortOrder === null) {
+      const lastSite = await prisma.site.findFirst({
+        where: { sectionId: parseInt(sectionId) },
+        orderBy: { sortOrder: 'desc' },
+      });
+      finalSortOrder = (lastSite?.sortOrder || 0) + 1;
+    }
+
     const site = await prisma.site.create({
       data: {
         title,
@@ -17,7 +27,7 @@ export async function POST(request: Request) {
         sectionId: parseInt(sectionId),
         description,
         icon,
-        sortOrder: sortOrder || 0,
+        sortOrder: finalSortOrder,
       },
     });
 
