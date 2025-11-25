@@ -33,7 +33,9 @@ export async function POST(request: Request) {
     // Set a simple cookie for basic protection (not secure for production but fits "simple" requirement)
     response.cookies.set('auth_token', 'admin_logged_in', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      // 在本地生产环境测试(npm start)或非HTTPS生产环境时，secure: true 会导致 Cookie 无法设置
+      // 这里改为 false 以兼容 HTTP 环境。如果您的生产环境强制 HTTPS，可以改回 true 或使用环境变量控制
+      secure: false,
       maxAge: 60 * 60 * 24, // 1 day
       path: '/',
       sameSite: 'lax', // 允许在同站导航时发送 Cookie
