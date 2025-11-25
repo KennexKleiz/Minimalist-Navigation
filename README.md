@@ -50,19 +50,36 @@ npm install
 pnpm install
 ```
 
-### 3. 数据库初始化
+## 3. 配置环境变量
+
+1.  在项目根目录下找到 `.env` 文件（如果没有，请创建一个）。
+2.  参考以下内容配置您的环境变量：
+
+```env
+# 数据库连接字符串 (默认使用 SQLite 文件数据库)
+DATABASE_URL="file:./dev.db"
+
+# Google Gemini API Key (用于 AI 智能助手和自动填充功能)
+# 获取地址: https://makersuite.google.com/app/apikey
+GEMINI_API_KEY="your_gemini_api_key_here"
+
+# (可选) 如果您部署在生产环境，建议设置一个随机的密钥用于加密 Cookie 等
+# NEXTAUTH_SECRET="your_random_secret_string"
+```
+
+### 4. 数据库初始化
 ```bash
 npx prisma migrate dev --name init
 npx prisma db seed # 导入初始数据
 ```
 
-### 4. 启动开发服务器
+### 5. 启动开发服务器
 ```bash
 npm run dev
 ```
 访问 http://localhost:3000 即可看到效果。
 
-### 5. 后台管理
+### 6. 后台管理
 访问 http://localhost:3000/admin 进入后台管理系统。
 默认账户：admin   默认密码：123456
 - 默认账户：(请在数据库 seed 中查看或自行注册)

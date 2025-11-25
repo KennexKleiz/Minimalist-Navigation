@@ -21,6 +21,7 @@ interface Section {
   id?: number;
   name: string;
   sites: Site[];
+  password?: string | null;
 }
 
 interface Category {
@@ -49,6 +50,7 @@ export default function Dashboard() {
   const [modalType, setModalType] = useState<'category' | 'section' | 'site' | null>(null);
   const [modalData, setModalData] = useState<any>({});
   const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [toasts, setToasts] = useState<ToastProps[]>([]);
   const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
   const router = useRouter();
@@ -73,6 +75,9 @@ export default function Dashboard() {
         axios.get('/api/config')
       ]);
       setCategories(catsRes.data);
+      if (catsRes.data.length > 0 && !selectedCategoryId) {
+        setSelectedCategoryId(catsRes.data[0].id || null);
+      }
       setConfig(configRes.data);
     } catch (error) {
       console.error('Failed to fetch data', error);
@@ -207,6 +212,36 @@ export default function Dashboard() {
     setModalData(data);
     setIsEditMode(editMode);
     setModalOpen(true);
+  };
+
+  const handleModalFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploading(true);
+    try {
+      const res = await axios.post('/api/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      // 更新 input 值
+      const iconInput = document.querySelector('input[name="icon"]') as HTMLInputElement;
+      if (iconInput) {
+        iconInput.value = res.data.url;
+        // 触发 change 事件以防有监听器（虽然这里没有）
+        iconInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      
+      showToast('图标上传成功', 'success');
+    } catch (error) {
+      console.error('Upload failed', error);
+      showToast('上传失败', 'error');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleModalSubmit = async (e: React.FormEvent) => {
@@ -545,128 +580,172 @@ export default function Dashboard() {
             </form>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">内容管理</h2>
+            </div>
+
+            {/* Categories Navigation */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-2 border-b border-border no-scrollbar">
               <button
                 onClick={() => openModal('category')}
-                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 text-sm"
+                className="shrink-0 bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors"
               >
                 <Plus className="w-4 h-4" /> 新建分类
               </button>
+              <div className="w-px h-6 bg-border mx-2 shrink-0" />
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategoryId(category.id || null)}
+                  className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap border ${
+                    selectedCategoryId === category.id
+                      ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
+                      : 'bg-card hover:bg-muted text-muted-foreground border-transparent hover:border-border'
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
             </div>
 
-            {/* Categories List */}
+            {/* Selected Category Content */}
             <div className="space-y-6">
-              {categories.map((category, catIdx) => (
-                <div key={category.id || catIdx} className="bg-card border border-border rounded-xl overflow-hidden">
-                  <div className="p-4 bg-muted/50 border-b border-border flex items-center justify-between">
-                    <h3 className="font-semibold">{category.name}</h3>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => openModal('section', { categoryId: category.id })}
-                        className="p-1 hover:bg-muted rounded"
-                        title="新建版块"
-                        disabled={!category.id}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => openModal('category', category, true)}
-                        className="p-1 hover:bg-muted rounded text-primary"
-                        disabled={!category.id}
-                        title="编辑分类"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete('category', category.id)}
-                        className="p-1 hover:bg-muted rounded text-red-500"
-                        disabled={!category.id}
-                        title="删除分类"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+              {categories.map((category, catIdx) => {
+                if (category.id !== selectedCategoryId) return null;
+                
+                return (
+                  <div key={category.id || catIdx} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                    <div className="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-bold text-lg">{category.name}</h3>
+                        <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded-full border border-border">
+                          {category.sections.length} 个板块
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => openModal('section', { categoryId: category.id })}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                          title="新建版块"
+                          disabled={!category.id}
+                        >
+                          <Plus className="w-3.5 h-3.5" /> 新建板块
+                        </button>
+                        <button
+                          onClick={() => openModal('category', category, true)}
+                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary transition-colors"
+                          disabled={!category.id}
+                          title="编辑分类"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete('category', category.id)}
+                          className="p-1.5 hover:bg-red-50 rounded-lg text-muted-foreground hover:text-red-500 transition-colors"
+                          disabled={!category.id}
+                          title="删除分类"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="p-4 space-y-4">
-                    {category.sections.map((section, secIdx) => (
-                      <div key={section.id || secIdx} className="border border-border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{section.name}</span>
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                              {section.sites.length} 个站点
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => openModal('site', { sectionId: section.id })}
-                              className="text-xs flex items-center gap-1 text-primary hover:bg-primary/10 px-2 py-1 rounded transition-colors"
-                              disabled={!section.id}
-                            >
-                              <Plus className="w-3 h-3" /> 新建网址
-                            </button>
-                            <button
-                              onClick={() => handleMagicFill(catIdx, secIdx)}
-                              className="text-xs flex items-center gap-1 text-purple-600 hover:bg-purple-50 px-2 py-1 rounded transition-colors"
-                            >
-                              <Sparkles className="w-3 h-3" /> AI 智能填充
-                            </button>
-                            <button
-                              onClick={() => openModal('section', section, true)}
-                              className="text-xs flex items-center gap-1 text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
-                              disabled={!section.id}
-                            >
-                              <Edit className="w-3 h-3" /> 编辑板块
-                            </button>
-                            <button
-                              onClick={() => handleDelete('section', section.id)}
-                              className="text-xs flex items-center gap-1 text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
-                              disabled={!section.id}
-                            >
-                              <Trash2 className="w-3 h-3" /> 删除板块
-                            </button>
-                          </div>
+                    
+                    <div className="p-6 space-y-6">
+                      {category.sections.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground bg-muted/10 rounded-xl border border-dashed border-border">
+                          <p>暂无板块，请点击右上角新建</p>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {section.sites.map((site, siteIdx) => (
-                            <div key={site.id || siteIdx} className="flex items-center gap-3 p-2 bg-muted/30 rounded border border-border/50 group">
-                              <div className="w-8 h-8 bg-background rounded flex items-center justify-center text-xs border border-border">
-                                {site.icon ? <img src={site.icon} className="w-full h-full object-contain rounded" /> : <Globe className="w-4 h-4" />}
+                      ) : (
+                        category.sections.map((section, secIdx) => (
+                          <div key={section.id || secIdx} className="border border-border rounded-xl p-5 bg-background/50 hover:border-primary/20 transition-colors">
+                            <div className="flex items-center justify-between mb-5">
+                              <div className="flex items-center gap-3">
+                                <span className="font-bold text-base">{section.name}</span>
+                                <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full border border-border/50">
+                                  {section.sites.length} 个站点
+                                </span>
+                                {section.password && (
+                                  <span className="text-xs bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full border border-yellow-500/20">
+                                    密码保护
+                                  </span>
+                                )}
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium truncate">{site.title}</div>
-                                <div className="text-xs text-muted-foreground truncate">{site.url}</div>
-                              </div>
-                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex items-center gap-2">
                                 <button
-                                  onClick={() => openModal('site', site, true)}
-                                  className="p-1 hover:bg-primary/10 rounded text-primary"
-                                  disabled={!site.id}
-                                  title="编辑"
+                                  onClick={() => openModal('site', { sectionId: section.id })}
+                                  className="text-xs flex items-center gap-1 text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-md transition-colors font-medium"
+                                  disabled={!section.id}
                                 >
-                                  <Edit className="w-3 h-3" />
+                                  <Plus className="w-3.5 h-3.5" /> 新建网址
                                 </button>
                                 <button
-                                  onClick={() => handleDelete('site', site.id)}
-                                  className="p-1 hover:bg-red-50 rounded text-red-500"
-                                  disabled={!site.id}
-                                  title="删除"
+                                  onClick={() => handleMagicFill(catIdx, secIdx)}
+                                  className="text-xs flex items-center gap-1 text-purple-600 hover:bg-purple-50 px-2.5 py-1.5 rounded-md transition-colors font-medium"
                                 >
-                                  <Trash2 className="w-3 h-3" />
+                                  <Sparkles className="w-3.5 h-3.5" /> AI 填充
+                                </button>
+                                <div className="w-px h-4 bg-border mx-1" />
+                                <button
+                                  onClick={() => openModal('section', section, true)}
+                                  className="text-xs flex items-center gap-1 text-muted-foreground hover:text-primary px-2 py-1.5 rounded-md transition-colors"
+                                  disabled={!section.id}
+                                >
+                                  <Edit className="w-3.5 h-3.5" /> 编辑
+                                </button>
+                                <button
+                                  onClick={() => handleDelete('section', section.id)}
+                                  className="text-xs flex items-center gap-1 text-muted-foreground hover:text-red-500 px-2 py-1.5 rounded-md transition-colors"
+                                  disabled={!section.id}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" /> 删除
                                 </button>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                              {section.sites.map((site, siteIdx) => (
+                                <div key={site.id || siteIdx} className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border/60 hover:border-primary/30 hover:shadow-sm transition-all group">
+                                  <div className="w-10 h-10 bg-muted/30 rounded-lg flex items-center justify-center text-xs border border-border/50 shrink-0 overflow-hidden">
+                                    {site.icon ? <img src={site.icon} className="w-full h-full object-contain" /> : <Globe className="w-5 h-5 text-muted-foreground/50" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium truncate text-foreground">{site.title}</div>
+                                    <div className="text-xs text-muted-foreground truncate opacity-70">{site.url}</div>
+                                  </div>
+                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={() => openModal('site', site, true)}
+                                      className="p-1.5 hover:bg-primary/10 rounded-md text-primary transition-colors"
+                                      disabled={!site.id}
+                                      title="编辑"
+                                    >
+                                      <Edit className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete('site', site.id)}
+                                      className="p-1.5 hover:bg-red-50 rounded-md text-red-500 transition-colors"
+                                      disabled={!site.id}
+                                      title="删除"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                              {section.sites.length === 0 && (
+                                <div className="col-span-full text-center py-4 text-xs text-muted-foreground border border-dashed border-border/50 rounded-lg">
+                                  暂无站点
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -750,13 +829,26 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">图标链接（可选）</label>
-                    <input
-                      name="icon"
-                      type="url"
-                      defaultValue={isEditMode ? modalData.icon : ''}
-                      placeholder="https://example.com/favicon.ico"
-                      className="w-full p-2 border border-border rounded-lg bg-background"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        name="icon"
+                        type="text"
+                        defaultValue={isEditMode ? modalData.icon : ''}
+                        placeholder="输入链接或上传图片"
+                        className="flex-1 p-2 border border-border rounded-lg bg-background"
+                      />
+                      <label className={`px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg cursor-pointer flex items-center gap-2 transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <span className="text-sm whitespace-nowrap">上传</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleModalFileUpload}
+                          className="hidden"
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">支持远程 URL 或本地上传图片</p>
                   </div>
                 </>
               )}
