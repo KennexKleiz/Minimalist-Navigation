@@ -29,16 +29,10 @@ export async function POST(request: Request) {
     }
 
     // 密码正确，获取该板块下的站点数据
-    const section = await prisma.section.findUnique({
-      where: { id: parseInt(sectionId) },
-      include: {
-        sites: {
-          orderBy: { sortOrder: 'asc' }
-        }
-      }
-    });
+    // 使用 raw query 确保获取 likes 和 views
+    const sites: any[] = await prisma.$queryRaw`SELECT * FROM Site WHERE sectionId = ${parseInt(sectionId)} ORDER BY sortOrder ASC`;
 
-    return NextResponse.json({ sites: section?.sites || [] });
+    return NextResponse.json({ sites: sites || [] });
   } catch (error) {
     console.error('Error verifying password:', error);
     return NextResponse.json({ error: 'Verification failed' }, { status: 500 });

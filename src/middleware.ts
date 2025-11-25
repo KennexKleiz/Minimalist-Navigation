@@ -16,7 +16,14 @@ export function middleware(request: NextRequest) {
   // Check if the request is for admin API routes
   if (request.nextUrl.pathname.startsWith('/api/') && !request.nextUrl.pathname.startsWith('/api/auth/login')) {
     // List of public API routes that don't require authentication
-    const publicRoutes = ['/api/categories', '/api/config', '/api/ai/recommend', '/api/sections/verify'];
+    const publicRoutes = [
+      '/api/categories',
+      '/api/config',
+      '/api/ai/recommend',
+      '/api/sections/verify',
+      '/api/sites/interact',
+      '/api/sites/rankings'
+    ];
     const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname === route);
 
     // Only check authentication for non-public routes

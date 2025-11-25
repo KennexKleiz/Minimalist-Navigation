@@ -9,6 +9,7 @@ import SiteCard from '@/components/SiteCard';
 import AIAssistant from '@/components/AIAssistant';
 import Navbar from '@/components/Navbar';
 import PasswordModal from '@/components/PasswordModal';
+import RankingsSection from '@/components/RankingsSection';
 import { PageSkeleton } from '@/components/SkeletonLoader';
 
 interface Site {
@@ -37,11 +38,15 @@ interface Category {
 interface Config {
   title: string;
   subtitle: string;
+  backgroundImage?: string;
+  backgroundImages?: string;
+  backgroundMode?: string;
 }
 
 export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [config, setConfig] = useState<Config>({ title: '极简智能导航', subtitle: '探索数字世界的无限可能' });
+  const [currentBg, setCurrentBg] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,6 +83,22 @@ export default function Home() {
         setCategories(catsRes.data);
         setFilteredCategories(catsRes.data);
         setConfig(configRes.data);
+
+        // Handle background logic
+        const cfg = configRes.data;
+        if (cfg.backgroundMode === 'random' && cfg.backgroundImages) {
+          try {
+            const images = JSON.parse(cfg.backgroundImages);
+            if (images.length > 0) {
+              const randomImage = images[Math.floor(Math.random() * images.length)];
+              setCurrentBg(randomImage);
+            }
+          } catch (e) {
+            console.error('Failed to parse background images', e);
+          }
+        } else {
+          setCurrentBg(cfg.backgroundImage || null);
+        }
       } catch (error) {
         console.error('Failed to fetch data', error);
       } finally {
@@ -133,11 +154,23 @@ export default function Home() {
       <Navbar title={config.title} categories={categories} />
 
       {/* Hero Section */}
-      <header className="relative overflow-hidden pt-20 pb-24 sm:pt-32 sm:pb-36">
+      <header className="relative pt-20 pb-24 sm:pt-32 sm:pb-36">
         {/* Dynamic Background */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-primary/10 via-purple-500/5 to-transparent rounded-[100%] blur-3xl opacity-60" />
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {currentBg ? (
+            <>
+              <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-20 transition-opacity duration-500"
+                style={{ backgroundImage: `url('${currentBg}')` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/60 to-background" />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-primary/10 via-purple-500/5 to-transparent rounded-[100%] blur-3xl opacity-60" />
+              <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+            </>
+          )}
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -214,6 +247,9 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 pb-24">
+        {/* 排行榜区域 - 仅在未搜索时显示 */}
+        {!searchQuery && <RankingsSection />}
+
         {searchQuery && filteredCategories.length === 0 && (
           <div className="text-center py-20">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">

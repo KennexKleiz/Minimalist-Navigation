@@ -18,6 +18,8 @@ interface Site {
   url: string;
   description: string;
   icon: string;
+  likes?: number;
+  views?: number;
 }
 
 interface Section {
@@ -38,6 +40,12 @@ interface Category {
 interface Config {
   title: string;
   subtitle: string;
+  gridColumns?: number;
+  truncateDescription?: boolean;
+  containerMaxWidth?: string;
+  backgroundImage?: string;
+  backgroundImages?: string;
+  backgroundMode?: string;
 }
 
 export default function CategoryPage() {
@@ -47,7 +55,14 @@ export default function CategoryPage() {
 
   const [category, setCategory] = useState<Category | null>(null);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
-  const [config, setConfig] = useState<Config>({ title: '极简智能导航', subtitle: '探索数字世界的无限可能' });
+  const [config, setConfig] = useState<Config>({
+    title: '极简智能导航',
+    subtitle: '探索数字世界的无限可能',
+    gridColumns: 4,
+    truncateDescription: true,
+    containerMaxWidth: '1440px'
+  });
+  const [currentBg, setCurrentBg] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredSections, setFilteredSections] = useState<Section[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -123,6 +138,22 @@ export default function CategoryPage() {
       setAllCategories(catsRes.data);
       setConfig(configRes.data);
 
+      // Handle background logic
+      const cfg = configRes.data;
+      if (cfg.backgroundMode === 'random' && cfg.backgroundImages) {
+        try {
+          const images = JSON.parse(cfg.backgroundImages);
+          if (images.length > 0) {
+            const randomImage = images[Math.floor(Math.random() * images.length)];
+            setCurrentBg(randomImage);
+          }
+        } catch (e) {
+          console.error('Failed to parse background images', e);
+        }
+      } else {
+        setCurrentBg(cfg.backgroundImage || null);
+      }
+
       // 找到当前分类
       const currentCategory = catsRes.data.find((cat: Category) => cat.id === parseInt(categoryId));
       if (currentCategory) {
@@ -175,11 +206,23 @@ export default function CategoryPage() {
       <Navbar title={config.title} categories={allCategories} />
 
       {/* Hero Section */}
-      <header className="relative overflow-hidden py-12 sm:py-20">
+      <header className="relative py-12 sm:py-20">
         {/* Dynamic Background */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-primary/10 via-purple-500/5 to-transparent rounded-[100%] blur-3xl opacity-60" />
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {currentBg ? (
+            <>
+              <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-20 transition-opacity duration-500"
+                style={{ backgroundImage: `url('${currentBg}')` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/60 to-background" />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-primary/10 via-purple-500/5 to-transparent rounded-[100%] blur-3xl opacity-60" />
+              <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+            </>
+          )}
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -263,7 +306,10 @@ export default function CategoryPage() {
       )}
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 pb-20 min-h-[60vh]">
+      <main
+        className="container mx-auto px-4 py-8 pb-20 min-h-[60vh]"
+        style={{ maxWidth: config.containerMaxWidth || '1440px' }}
+      >
         {searchQuery && filteredSections.length === 0 && (
           <div className="text-center py-20">
             <p className="text-muted-foreground text-lg">未找到匹配的网站</p>
@@ -307,50 +353,88 @@ export default function CategoryPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.4 }}
-                className="scroll-mt-32 bg-card/30 border border-border/40 rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-sm"
+                transition={{ duration: 0.5 }}
+                className="scroll-mt-32"
               >
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-8 bg-gradient-to-b from-primary to-purple-600 rounded-full shadow-sm"></div>
-                  <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                    {section.name}
-                  </h2>
-                </div>
-                {section.isLocked ? (
-                  <span className="text-xs bg-yellow-500/10 text-yellow-600 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium border border-yellow-500/20">
-                    <Lock className="w-3.5 h-3.5" /> 密码保护
-                  </span>
-                ) : (
-                  <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full font-medium border border-border/50">
-                    {section.sites.length} 个站点
-                  </span>
-                )}
-              </div>
-
-              {section.isLocked ? (
-                <div className="bg-gradient-to-br from-muted/30 to-background border border-border/50 rounded-2xl p-12 text-center">
-                  <div className="w-20 h-20 bg-background rounded-3xl shadow-sm border border-border/50 flex items-center justify-center mx-auto mb-6 rotate-3 group">
-                    <Lock className="w-10 h-10 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
+                <div className="flex items-center justify-between mb-6 pl-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-7 bg-gradient-to-b from-primary to-purple-600 rounded-full shadow-sm"></div>
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                      {section.name}
+                    </h2>
                   </div>
-                  <h3 className="text-xl font-semibold mb-3 text-foreground">该板块受密码保护</h3>
-                  <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
-                    为了保护隐私或特定内容，该板块需要输入密码才能访问。
-                  </p>
-                  <button
-                    onClick={() => setPasswordModal({ isOpen: true, sectionId: section.id, sectionName: section.name })}
-                    className="px-8 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 font-medium flex items-center gap-2 mx-auto"
-                  >
-                    <Lock className="w-4 h-4" /> 输入访问密码
-                  </button>
+                  {section.isLocked ? (
+                    <span className="text-xs bg-yellow-500/10 text-yellow-600 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium border border-yellow-500/20">
+                      <Lock className="w-3.5 h-3.5" /> 密码保护
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full font-medium border border-border/50">
+                      {section.sites.length} 个站点
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {section.sites.map((site) => (
-                    <SiteCard key={site.id} {...site} />
-                  ))}
-                </div>
-              )}
+
+                {section.isLocked ? (
+                  <div className="bg-background/40 backdrop-blur-md border border-border/50 rounded-2xl p-8 text-center">
+                    <div className="w-16 h-16 bg-background/80 rounded-2xl shadow-sm border border-border/50 flex items-center justify-center mx-auto mb-4 rotate-3 group">
+                      <Lock className="w-8 h-8 text-muted-foreground/60 group-hover:text-primary/80 transition-colors" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-foreground">该板块受密码保护</h3>
+                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto leading-relaxed">
+                      为了保护隐私或特定内容，该板块需要输入密码才能访问。
+                    </p>
+                    <button
+                      onClick={() => setPasswordModal({ isOpen: true, sectionId: section.id, sectionName: section.name })}
+                      className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all shadow-md shadow-primary/20 hover:shadow-primary/30 text-sm font-medium flex items-center gap-2 mx-auto"
+                    >
+                      <Lock className="w-3.5 h-3.5" /> 输入访问密码
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {section.sites.length > 0 ? (
+                      <motion.div
+                        className="grid gap-6 sm:gap-8"
+                        style={{
+                          gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${config.gridColumns === 3 ? '380px' : config.gridColumns === 5 ? '280px' : '320px'}), 1fr))`
+                        }}
+                        variants={{
+                          hidden: { opacity: 0 },
+                          show: {
+                            opacity: 1,
+                            transition: {
+                              staggerChildren: 0.1
+                            }
+                          }
+                        }}
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true }}
+                      >
+                        {section.sites.map((site) => (
+                          <motion.div
+                            key={site.id}
+                            variants={{
+                              hidden: { opacity: 0, y: 20 },
+                              show: { opacity: 1, y: 0 }
+                            }}
+                          >
+                            <SiteCard
+                              {...site}
+                              truncateDescription={config.truncateDescription}
+                              initialLikes={site.likes || 0}
+                              initialViews={site.views || 0}
+                            />
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    ) : (
+                      <div className="text-center py-12 bg-muted/20 rounded-2xl border border-dashed border-border/60">
+                        <p className="text-muted-foreground text-sm">暂无站点内容</p>
+                      </div>
+                    )}
+                  </>
+                )}
               </motion.section>
             ))}
           </div>

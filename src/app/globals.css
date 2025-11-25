@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --primary: #3b82f6;
+  --background: #f4f4f5; /* zinc-100 */
+  --foreground: #18181b; /* zinc-900 */
+  --primary: #6366f1;    /* indigo-500 */
   --primary-foreground: #ffffff;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #3b82f6;
+  --card-foreground: #18181b;
+  --border: #e4e4e7;     /* zinc-200 */
+  --input: #e4e4e7;
+  --ring: #6366f1;
 }
 
 @theme inline {
@@ -26,17 +26,31 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* 支持基于类的暗黑模式 */
+.dark {
+  --background: #09090b; /* zinc-950 */
+  --foreground: #fafafa; /* zinc-50 */
+  --primary: #6366f1;    /* indigo-500 */
+  --primary-foreground: #ffffff;
+  --card: #18181b;       /* zinc-900 */
+  --card-foreground: #fafafa;
+  --border: #27272a;     /* zinc-800 */
+  --input: #27272a;
+  --ring: #6366f1;
+}
+
+/* 同时也支持系统偏好，作为默认值 */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-    --primary: #3b82f6;
+    --background: #09090b;
+    --foreground: #fafafa;
+    --primary: #6366f1;
     --primary-foreground: #ffffff;
-    --card: #0f172a;
-    --card-foreground: #f8fafc;
-    --border: #1e293b;
-    --input: #1e293b;
-    --ring: #3b82f6;
+    --card: #18181b;
+    --card-foreground: #fafafa;
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #6366f1;
   }
 }
 

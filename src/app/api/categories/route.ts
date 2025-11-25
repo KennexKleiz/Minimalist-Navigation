@@ -6,45 +6,48 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
+    // 1. Fetch categories and sections structure
     const categories = await prisma.category.findMany({
       include: {
         sections: {
-          include: {
-            sites: {
-              orderBy: { sortOrder: 'asc' }
-            }
-          },
           orderBy: { sortOrder: 'asc' }
         }
       },
       orderBy: { sortOrder: 'asc' }
     });
 
-    // 检查是否是管理员请求（通过 Cookie）
+    // 2. Fetch all sites using raw query to ensure we get likes and views
+    const allSites: any[] = await prisma.$queryRaw`SELECT * FROM Site ORDER BY sortOrder ASC`;
+
+    // 3. Check admin status
     const cookieStore = await cookies();
     const authToken = cookieStore.get('auth_token');
     const isAdmin = authToken?.value === 'admin_logged_in';
 
+    // 4. Merge sites into categories
     const processedCategories = categories.map(category => ({
       ...category,
       sections: category.sections.map((section: any) => {
-        // 如果是管理员，返回完整数据
-        if (isAdmin) return section;
+        // Filter sites for this section
+        const sectionSites = allSites.filter((site: any) => site.sectionId === section.id);
 
-        // 如果有密码保护
+        // If admin, return everything
+        if (isAdmin) {
+          return { ...section, sites: sectionSites };
+        }
+
+        // If password protected
         if (section.password) {
-          // 创建一个新的对象，避免修改原始数据
-          // 注意：这里我们必须确保不返回 sites 数组，或者返回空数组
           return {
             ...section,
-            password: '***', // 隐藏真实密码
-            sites: [], // 隐藏站点内容
-            isLocked: true // 添加锁定标记
+            password: '***',
+            sites: [],
+            isLocked: true
           };
         }
 
-        // 无密码，返回正常数据
-        return section;
+        // Normal section
+        return { ...section, sites: sectionSites };
       })
     }));
 

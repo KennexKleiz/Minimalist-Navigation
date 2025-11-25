@@ -19,10 +19,17 @@ model Admin {
 }
 
 model SiteConfig {
-  id          Int      @id @default(autoincrement())
-  title       String   @default("极简智能导航")
-  subtitle    String   @default("探索数字世界的无限可能")
-  updatedAt   DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  title               String   @default("极简智能导航")
+  subtitle            String   @default("探索数字世界的无限可能")
+  gridColumns         Int      @default(4)
+  truncateDescription Boolean  @default(true)
+  containerMaxWidth   String   @default("1440px")
+  favicon             String?
+  backgroundImage     String?
+  backgroundImages    String?  // JSON string of URLs
+  backgroundMode      String   @default("fixed") // "fixed" or "random"
+  updatedAt           DateTime @updatedAt
 }
 
 model Category {
@@ -54,8 +61,21 @@ model Site {
   description String?
   icon        String?  // URL to favicon or icon name
   sortOrder   Int      @default(0)
+  likes       Int      @default(0)
+  views       Int      @default(0)
   sectionId   Int
   section     Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  likesList   Like[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  siteId    Int
+  ip        String
+  createdAt DateTime @default(now())
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, ip])
 }

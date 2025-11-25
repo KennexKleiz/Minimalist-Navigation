@@ -31,8 +31,19 @@ interface Category {
 
 export default function Dashboard() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [config, setConfig] = useState({ title: '', subtitle: '' });
+  const [config, setConfig] = useState({
+    title: '',
+    subtitle: '',
+    gridColumns: 4,
+    truncateDescription: true,
+    containerMaxWidth: '1440px',
+    favicon: '',
+    backgroundImage: '',
+    backgroundImages: '[]',
+    backgroundMode: 'fixed'
+  });
   const [isLoading, setIsLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password'>('content');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'category' | 'section' | 'site' | null>(null);
@@ -84,6 +95,42 @@ export default function Dashboard() {
     } catch (error) {
       showToast('保存失败', 'error');
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'favicon' | 'backgroundImage' | 'backgroundImages') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploading(true);
+    try {
+      const res = await axios.post('/api/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      if (field === 'backgroundImages') {
+        const currentImages = JSON.parse(config.backgroundImages || '[]');
+        const newImages = [...currentImages, res.data.url];
+        setConfig(prev => ({ ...prev, backgroundImages: JSON.stringify(newImages) }));
+      } else {
+        setConfig(prev => ({ ...prev, [field]: res.data.url }));
+      }
+      
+      showToast('上传成功', 'success');
+    } catch (error) {
+      console.error('Upload failed', error);
+      showToast('上传失败', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeBackgroundImage = (index: number) => {
+    const currentImages = JSON.parse(config.backgroundImages || '[]');
+    const newImages = currentImages.filter((_: any, i: number) => i !== index);
+    setConfig(prev => ({ ...prev, backgroundImages: JSON.stringify(newImages) }));
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -292,7 +339,166 @@ export default function Dashboard() {
                   className="w-full p-2 border border-border rounded-lg bg-background"
                 />
               </div>
-              <button onClick={handleSaveConfig} className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">分类页每行显示数量</label>
+                  <select
+                    value={config.gridColumns}
+                    onChange={(e) => setConfig({ ...config, gridColumns: parseInt(e.target.value) })}
+                    className="w-full p-2 border border-border rounded-lg bg-background"
+                  >
+                    <option value={3}>3个</option>
+                    <option value={4}>4个</option>
+                    <option value={5}>5个</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">分类页最大宽度</label>
+                  <input
+                    type="text"
+                    value={config.containerMaxWidth}
+                    onChange={(e) => setConfig({ ...config, containerMaxWidth: e.target.value })}
+                    placeholder="例如: 1440px 或 100%"
+                    className="w-full p-2 border border-border rounded-lg bg-background"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="truncateDescription"
+                  checked={config.truncateDescription}
+                  onChange={(e) => setConfig({ ...config, truncateDescription: e.target.checked })}
+                  className="rounded border-border"
+                />
+                <label htmlFor="truncateDescription" className="text-sm font-medium">
+                  描述只显示一行（多余截断）
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border">
+                <div>
+                  <label className="block text-sm font-medium mb-2">网站 Favicon 图标</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 border border-border rounded-lg flex items-center justify-center bg-muted/30 overflow-hidden">
+                      {config.favicon ? (
+                        <img src={config.favicon} alt="Favicon" className="w-full h-full object-contain" />
+                      ) : (
+                        <Globe className="w-6 h-6 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={config.favicon || ''}
+                        onChange={(e) => setConfig({ ...config, favicon: e.target.value })}
+                        placeholder="输入图片链接或上传"
+                        className="w-full p-2 border border-border rounded-lg bg-background text-sm mb-2"
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'favicon')}
+                        className="text-sm text-muted-foreground file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                        disabled={uploading}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">首页背景图设置</label>
+                  
+                  <div className="mb-4">
+                    <label className="text-xs text-muted-foreground mb-2 block">显示模式</label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="backgroundMode"
+                          value="fixed"
+                          checked={config.backgroundMode === 'fixed'}
+                          onChange={(e) => setConfig({ ...config, backgroundMode: e.target.value })}
+                          className="rounded-full border-border"
+                        />
+                        <span className="text-sm">固定一张</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="backgroundMode"
+                          value="random"
+                          checked={config.backgroundMode === 'random'}
+                          onChange={(e) => setConfig({ ...config, backgroundMode: e.target.value })}
+                          className="rounded-full border-border"
+                        />
+                        <span className="text-sm">每次刷新随机</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {config.backgroundMode === 'fixed' ? (
+                    <div className="flex items-center gap-4">
+                      <div className="w-20 h-12 border border-border rounded-lg flex items-center justify-center bg-muted/30 overflow-hidden">
+                        {config.backgroundImage ? (
+                          <img src={config.backgroundImage} alt="Background" className="w-full h-full object-cover" />
+                        ) : (
+                          <Layout className="w-6 h-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={config.backgroundImage || ''}
+                          onChange={(e) => setConfig({ ...config, backgroundImage: e.target.value })}
+                          placeholder="输入图片链接或上传"
+                          className="w-full p-2 border border-border rounded-lg bg-background text-sm mb-2"
+                        />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, 'backgroundImage')}
+                          className="text-sm text-muted-foreground file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                          disabled={uploading}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {JSON.parse(config.backgroundImages || '[]').map((url: string, index: number) => (
+                          <div key={index} className="relative group aspect-video border border-border rounded-lg overflow-hidden bg-muted/30">
+                            <img src={url} alt={`Background ${index + 1}`} className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => removeBackgroundImage(index)}
+                              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="删除"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                        <label className="aspect-video border border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/30 transition-colors">
+                          <Plus className="w-6 h-6 text-muted-foreground mb-1" />
+                          <span className="text-xs text-muted-foreground">添加图片</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e, 'backgroundImages')}
+                            className="hidden"
+                            disabled={uploading}
+                          />
+                        </label>
+                      </div>
+                      <p className="text-xs text-muted-foreground">上传多张图片，每次刷新页面将随机显示其中一张。</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button onClick={handleSaveConfig} className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 mt-4">
                 <Save className="w-4 h-4" /> 保存更改
               </button>
             </div>
