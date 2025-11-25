@@ -93,6 +93,9 @@ npm run build
 npm start
 ```
 
+### ⚠️ 重要注意事项
+- **数据库更新**：每次更新代码后，如果涉及数据库字段变更（如新增功能），请务必在服务器上运行 `npx prisma db push` 或 `npx prisma migrate deploy` 来更新数据库结构，否则可能会导致保存失败等错误。
+
 ## 📄 许可证
 
 MIT License

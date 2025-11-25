@@ -44,7 +44,10 @@ export async function PUT(request: Request) {
       backgroundImage,
       backgroundImages,
       backgroundMode,
-      footerHtml
+      footerHtml,
+      webdavUrl,
+      webdavUsername,
+      webdavPassword
     } = body;
 
     // 使用 raw query 更新配置
@@ -64,13 +67,16 @@ export async function PUT(request: Request) {
             backgroundImages = ${backgroundImages || '[]'},
             backgroundMode = ${backgroundMode || 'fixed'},
             footerHtml = ${footerHtml || null},
+            webdavUrl = ${webdavUrl || null},
+            webdavUsername = ${webdavUsername || null},
+            webdavPassword = ${webdavPassword || null},
             updatedAt = ${new Date()}
         WHERE id = 1
       `;
     } else {
       await prisma.$executeRaw`
-        INSERT INTO SiteConfig (id, title, subtitle, gridColumns, truncateDescription, containerMaxWidth, favicon, backgroundImage, backgroundImages, backgroundMode, footerHtml, updatedAt)
-        VALUES (1, ${title}, ${subtitle}, ${gridColumns}, ${truncateDescription ? 1 : 0}, ${containerMaxWidth}, ${favicon || null}, ${backgroundImage || null}, ${backgroundImages || '[]'}, ${backgroundMode || 'fixed'}, ${footerHtml || null}, ${new Date()})
+        INSERT INTO SiteConfig (id, title, subtitle, gridColumns, truncateDescription, containerMaxWidth, favicon, backgroundImage, backgroundImages, backgroundMode, footerHtml, webdavUrl, webdavUsername, webdavPassword, updatedAt)
+        VALUES (1, ${title}, ${subtitle}, ${gridColumns}, ${truncateDescription ? 1 : 0}, ${containerMaxWidth}, ${favicon || null}, ${backgroundImage || null}, ${backgroundImages || '[]'}, ${backgroundMode || 'fixed'}, ${footerHtml || null}, ${webdavUrl || null}, ${webdavUsername || null}, ${webdavPassword || null}, ${new Date()})
       `;
     }
     

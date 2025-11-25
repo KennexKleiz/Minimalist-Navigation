@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { Plus, Trash2, Save, Sparkles, LogOut, Settings, Layout, Globe, Edit, ExternalLink, FileText, Tag as TagIcon } from 'lucide-react';
+import { Plus, Trash2, Save, Sparkles, LogOut, Settings, Layout, Globe, Edit, ExternalLink, FileText, Tag as TagIcon, Database, Upload, Download, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ToastContainer, ToastProps } from '@/components/Toast';
@@ -54,11 +54,16 @@ export default function Dashboard() {
     backgroundImage: '',
     backgroundImages: '[]',
     backgroundMode: 'fixed',
-    footerHtml: ''
+    footerHtml: '',
+    webdavUrl: '',
+    webdavUsername: '',
+    webdavPassword: ''
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password' | 'tags'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password' | 'tags' | 'backup'>('content');
+  const [webdavBackups, setWebdavBackups] = useState<any[]>([]);
+  const [webdavLoading, setWebdavLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'category' | 'section' | 'site' | 'batch_import' | 'tag' | null>(null);
   const [modalData, setModalData] = useState<any>({});
@@ -115,6 +120,104 @@ export default function Dashboard() {
       showToast('设置已保存', 'success');
     } catch (error) {
       showToast('保存失败', 'error');
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const res = await axios.get('/api/backup/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const contentDisposition = res.headers['content-disposition'];
+      let filename = 'daohang-backup.json';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch.length === 2) filename = filenameMatch[1];
+      }
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      showToast('导出成功', 'success');
+    } catch (error) {
+      showToast('导出失败', 'error');
+    }
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const content = e.target?.result;
+        const data = JSON.parse(content as string);
+        await axios.post('/api/backup/import', data);
+        showToast('导入成功，页面即将刷新', 'success');
+        setTimeout(() => window.location.reload(), 1500);
+      } catch (error) {
+        console.error(error);
+        showToast('导入失败，请检查文件格式', 'error');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleWebDAVTest = async () => {
+    setWebdavLoading(true);
+    try {
+      // 先保存配置
+      await axios.put('/api/config', config);
+      await axios.post('/api/backup/webdav', { action: 'test' });
+      showToast('WebDAV 连接成功', 'success');
+      fetchWebDAVBackups();
+    } catch (error) {
+      showToast('WebDAV 连接失败', 'error');
+    } finally {
+      setWebdavLoading(false);
+    }
+  };
+
+  const fetchWebDAVBackups = async () => {
+    setWebdavLoading(true);
+    try {
+      const res = await axios.post('/api/backup/webdav', { action: 'list' });
+      setWebdavBackups(res.data.backups);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setWebdavLoading(false);
+    }
+  };
+
+  const handleWebDAVUpload = async () => {
+    setWebdavLoading(true);
+    try {
+      await axios.post('/api/backup/webdav', { action: 'upload' });
+      showToast('备份上传成功', 'success');
+      fetchWebDAVBackups();
+    } catch (error) {
+      showToast('备份上传失败', 'error');
+    } finally {
+      setWebdavLoading(false);
+    }
+  };
+
+  const handleWebDAVRestore = async (filename: string) => {
+    if (!confirm('确定要从该备份恢复吗？这将覆盖当前所有数据！')) return;
+    
+    setWebdavLoading(true);
+    try {
+      const res = await axios.post('/api/backup/webdav', { action: 'download', filename });
+      await axios.post('/api/backup/import', res.data.content);
+      showToast('恢复成功，页面即将刷新', 'success');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      showToast('恢复失败', 'error');
+    } finally {
+      setWebdavLoading(false);
     }
   };
 
@@ -413,6 +516,17 @@ export default function Dashboard() {
           >
             <Save className="w-4 h-4" /> 修改密码
           </button>
+          <button
+            onClick={() => {
+              setActiveTab('backup');
+              if (config.webdavUrl) fetchWebDAVBackups();
+            }}
+            className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'backup' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+            }`}
+          >
+            <Database className="w-4 h-4" /> 备份恢复
+          </button>
         </nav>
 
         <div className="space-y-2 mt-auto">
@@ -668,6 +782,124 @@ export default function Dashboard() {
                 <Save className="w-4 h-4" /> 修改密码
               </button>
             </form>
+          </div>
+        ) : activeTab === 'backup' ? (
+          <div className="space-y-6">
+            <div className="bg-card p-8 rounded-2xl border border-border shadow-sm">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                <Database className="w-5 h-5" /> 本地备份与恢复
+              </h2>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleExport}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  <Download className="w-4 h-4" /> 导出配置文件
+                </button>
+                <label className="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors cursor-pointer">
+                  <Upload className="w-4 h-4" /> 导入配置文件
+                  <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+                </label>
+              </div>
+              <p className="text-sm text-muted-foreground mt-4">
+                导出文件包含所有网站配置、分类、标签及全局设置。导入时将覆盖当前所有数据，请谨慎操作。
+              </p>
+            </div>
+
+            <div className="bg-card p-8 rounded-2xl border border-border shadow-sm">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                <Globe className="w-5 h-5" /> WebDAV 云备份
+              </h2>
+              
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium mb-1">WebDAV 地址</label>
+                  <input
+                    type="text"
+                    value={config.webdavUrl || ''}
+                    onChange={(e) => setConfig({ ...config, webdavUrl: e.target.value })}
+                    placeholder="https://dav.example.com/dav/"
+                    className="w-full p-2 border border-border rounded-lg bg-background"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">用户名</label>
+                    <input
+                      type="text"
+                      value={config.webdavUsername || ''}
+                      onChange={(e) => setConfig({ ...config, webdavUsername: e.target.value })}
+                      className="w-full p-2 border border-border rounded-lg bg-background"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">密码</label>
+                    <input
+                      type="password"
+                      value={config.webdavPassword || ''}
+                      onChange={(e) => setConfig({ ...config, webdavPassword: e.target.value })}
+                      className="w-full p-2 border border-border rounded-lg bg-background"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleWebDAVTest}
+                    disabled={webdavLoading}
+                    className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors disabled:opacity-50"
+                  >
+                    {webdavLoading ? '连接中...' : '保存并测试连接'}
+                  </button>
+                  <button
+                    onClick={handleWebDAVUpload}
+                    disabled={webdavLoading || !config.webdavUrl}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    <Upload className="w-4 h-4" /> 立即备份到云端
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold">云端备份列表</h3>
+                  <button
+                    onClick={fetchWebDAVBackups}
+                    disabled={webdavLoading || !config.webdavUrl}
+                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                    title="刷新列表"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${webdavLoading ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+                
+                {webdavBackups.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground bg-muted/10 rounded-lg border border-dashed border-border">
+                    {config.webdavUrl ? '暂无备份文件' : '请先配置 WebDAV'}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {webdavBackups.map((backup) => (
+                      <div key={backup.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                        <div>
+                          <div className="font-medium text-sm">{backup.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(backup.lastMod).toLocaleString()} · {(backup.size / 1024).toFixed(2)} KB
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleWebDAVRestore(backup.name)}
+                          disabled={webdavLoading}
+                          className="px-3 py-1.5 text-xs bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
+                        >
+                          恢复
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         ) : activeTab === 'tags' ? (
           <div className="max-w-4xl bg-card p-8 rounded-2xl border border-border shadow-sm">

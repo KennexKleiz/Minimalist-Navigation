@@ -30,6 +30,9 @@ model SiteConfig {
   backgroundImages    String?  // JSON string of URLs
   backgroundMode      String   @default("fixed") // "fixed" or "random"
   footerHtml          String?  // Custom footer HTML
+  webdavUrl           String?
+  webdavUsername      String?
+  webdavPassword      String?
   updatedAt           DateTime @updatedAt
 }
 

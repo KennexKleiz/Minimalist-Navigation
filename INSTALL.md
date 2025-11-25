@@ -110,6 +110,13 @@ A: 修改 `prisma/schema.prisma` 文件中的 `datasource` 块，将 `provider` 
 **Q: AI 功能无法使用？**
 A: 请检查 `.env` 文件中是否正确配置了 `GEMINI_API_KEY`，并确保您的服务器网络可以访问 Google API。
 
+**Q: 更新代码后，后台保存设置失败？**
+A: 这通常是因为数据库结构没有更新。如果您在服务器上部署，请确保在更新代码后执行了数据库迁移命令：
+```bash
+npx prisma db push
+```
+或者，您可以将本地开发环境中已经更新好的 `prisma/dev.db` 文件上传到服务器覆盖旧文件（注意备份数据）。
+
 ---
 
 祝您使用愉快！
