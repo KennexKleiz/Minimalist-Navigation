@@ -53,7 +53,8 @@ export default function Dashboard() {
     favicon: '',
     backgroundImage: '',
     backgroundImages: '[]',
-    backgroundMode: 'fixed'
+    backgroundMode: 'fixed',
+    footerHtml: ''
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -609,6 +610,17 @@ export default function Dashboard() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              <div className="pt-4 border-t border-border">
+                <label className="block text-sm font-medium mb-1">底部自定义代码 (HTML)</label>
+                <textarea
+                  value={config.footerHtml || ''}
+                  onChange={(e) => setConfig({ ...config, footerHtml: e.target.value })}
+                  className="w-full p-2 border border-border rounded-lg bg-background font-mono text-sm h-32"
+                  placeholder="例如: 备案号、统计代码等"
+                />
+                <p className="text-xs text-muted-foreground mt-1">支持 HTML 标签，将显示在页面最底部。</p>
               </div>
 
               <button onClick={handleSaveConfig} className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 mt-4">

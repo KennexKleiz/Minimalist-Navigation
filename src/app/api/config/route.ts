@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+const DEFAULT_FOOTER_HTML = '© 2024 All Rights Reserved';
+
 export async function GET() {
   try {
     // 使用 raw query 获取配置，确保能获取到新字段
     const configs: any[] = await prisma.$queryRaw`SELECT * FROM SiteConfig LIMIT 1`;
     const config = configs[0];
+
+    if (config && !config.footerHtml) {
+      config.footerHtml = DEFAULT_FOOTER_HTML;
+    }
     
     return NextResponse.json(config || {
       title: '极简智能导航',
@@ -16,7 +22,8 @@ export async function GET() {
       favicon: '',
       backgroundImage: '',
       backgroundImages: '[]',
-      backgroundMode: 'fixed'
+      backgroundMode: 'fixed',
+      footerHtml: DEFAULT_FOOTER_HTML
     });
   } catch (error) {
     console.error('Error fetching config:', error);
@@ -36,7 +43,8 @@ export async function PUT(request: Request) {
       favicon,
       backgroundImage,
       backgroundImages,
-      backgroundMode
+      backgroundMode,
+      footerHtml
     } = body;
 
     // 使用 raw query 更新配置
@@ -55,13 +63,14 @@ export async function PUT(request: Request) {
             backgroundImage = ${backgroundImage || null},
             backgroundImages = ${backgroundImages || '[]'},
             backgroundMode = ${backgroundMode || 'fixed'},
+            footerHtml = ${footerHtml || null},
             updatedAt = ${new Date()}
         WHERE id = 1
       `;
     } else {
       await prisma.$executeRaw`
-        INSERT INTO SiteConfig (id, title, subtitle, gridColumns, truncateDescription, containerMaxWidth, favicon, backgroundImage, backgroundImages, backgroundMode, updatedAt)
-        VALUES (1, ${title}, ${subtitle}, ${gridColumns}, ${truncateDescription ? 1 : 0}, ${containerMaxWidth}, ${favicon || null}, ${backgroundImage || null}, ${backgroundImages || '[]'}, ${backgroundMode || 'fixed'}, ${new Date()})
+        INSERT INTO SiteConfig (id, title, subtitle, gridColumns, truncateDescription, containerMaxWidth, favicon, backgroundImage, backgroundImages, backgroundMode, footerHtml, updatedAt)
+        VALUES (1, ${title}, ${subtitle}, ${gridColumns}, ${truncateDescription ? 1 : 0}, ${containerMaxWidth}, ${favicon || null}, ${backgroundImage || null}, ${backgroundImages || '[]'}, ${backgroundMode || 'fixed'}, ${footerHtml || null}, ${new Date()})
       `;
     }
     
