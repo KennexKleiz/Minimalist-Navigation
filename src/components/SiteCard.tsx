@@ -197,12 +197,16 @@ export default function SiteCard({
                   // 如果图片加载失败，隐藏图片并显示首字母
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
-                  target.parentElement?.classList.add('fallback-icon');
                   
+                  // 检查是否已经添加了 fallback 元素，避免重复添加
+                  if (target.parentElement?.querySelector('.fallback-icon')) {
+                    return;
+                  }
+
                   // 创建一个包含首字母的元素并插入
                   const fallbackDiv = document.createElement('div');
                   const gradient = getGradientColor(title);
-                  fallbackDiv.className = `flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient} text-white font-bold text-2xl absolute inset-0`;
+                  fallbackDiv.className = `fallback-icon flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient} text-white font-bold text-2xl absolute inset-0`;
                   fallbackDiv.innerText = getFirstChar(title);
                   target.parentElement?.appendChild(fallbackDiv);
                 }}

@@ -1146,9 +1146,15 @@ export default function Dashboard() {
                                         onError={(e) => {
                                           const target = e.target as HTMLImageElement;
                                           target.style.display = 'none';
+                                          
+                                          // 检查是否已经添加了 fallback 元素，避免重复添加
+                                          if (target.parentElement?.querySelector('.fallback-icon')) {
+                                            return;
+                                          }
+
                                           const fallbackDiv = document.createElement('div');
                                           const gradient = getGradientColor(site.title || '');
-                                          fallbackDiv.className = `flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient} text-white font-bold text-sm absolute inset-0`;
+                                          fallbackDiv.className = `fallback-icon flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient} text-white font-bold text-sm absolute inset-0`;
                                           fallbackDiv.innerText = (site.title || '?').trim().charAt(0).toUpperCase();
                                           target.parentElement?.appendChild(fallbackDiv);
                                         }}
