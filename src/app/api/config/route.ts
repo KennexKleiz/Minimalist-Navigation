@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const DEFAULT_FOOTER_HTML = '© 2024 All Rights Reserved';
 
 export async function GET() {

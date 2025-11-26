@@ -44,10 +44,6 @@ interface Config {
   backgroundMode?: string;
 }
 
-// 强制动态渲染，确保页面内容始终是最新的
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [config, setConfig] = useState<Config>({ title: '极简智能导航', subtitle: '探索数字世界的无限可能' });
