@@ -68,7 +68,7 @@ export default function Navbar({ title, categories, logo }: NavbarProps) {
             >
               首页
             </Link>
-            {categories.slice(0, 6).map((cat) => (
+            {categories.map((cat) => (
               <Link
                 key={cat.id}
                 href={`/category/${cat.id}`}
@@ -79,9 +79,6 @@ export default function Navbar({ title, categories, logo }: NavbarProps) {
                 {cat.name}
               </Link>
             ))}
-            {categories.length > 6 && (
-              <span className="text-muted-foreground text-sm">...</span>
-            )}
           </div>
 
           {/* Right Actions */}
