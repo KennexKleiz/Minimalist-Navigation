@@ -395,10 +395,10 @@ export default function CategoryPage() {
                   <>
                     {section.sites.length > 0 ? (
                       <motion.div
-                        className="grid gap-6 sm:gap-8"
+                        className="grid grid-cols-2 sm:grid-cols-none gap-3 sm:gap-6 sm:gap-8 sm:grid-cols-responsive"
                         style={{
-                          gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${config.gridColumns === 3 ? '380px' : config.gridColumns === 5 ? '280px' : '320px'}), 1fr))`
-                        }}
+                          '--desktop-grid-cols': `repeat(auto-fill, minmax(min(100%, ${config.gridColumns === 3 ? '380px' : config.gridColumns === 5 ? '280px' : '320px'}), 1fr))`
+                        } as React.CSSProperties}
                         variants={{
                           hidden: { opacity: 0 },
                           show: {

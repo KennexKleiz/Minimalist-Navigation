@@ -100,3 +100,15 @@ body {
 .animate-scan {
   animation: scan 2s infinite linear;
 }
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm\:grid-cols-responsive {
+    grid-template-columns: var(--desktop-grid-cols) !important;
+  }
+}

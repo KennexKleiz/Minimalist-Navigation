@@ -133,7 +133,7 @@ export default function SiteCard({
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleView}
-      className="group relative flex flex-col h-full rounded-2xl border border-border/50 bg-card p-5 transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1"
+      className="group relative flex flex-col h-full rounded-2xl border border-border/50 bg-card p-3 sm:p-5 transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1"
     >
       {/* 背景和装饰容器 - 负责裁剪 */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
@@ -145,17 +145,17 @@ export default function SiteCard({
 
       {/* 角标 Badge - 左上角悬浮，更精致的样式 */}
       {badge && (
-        <div className="absolute -top-3 -left-3 z-30">
-          <span className="flex items-center justify-center px-3 py-1 text-[10px] font-bold text-white bg-gradient-to-r from-red-500 to-orange-500 rounded-br-xl rounded-tl-xl shadow-lg shadow-red-500/30 animate-pulse ring-2 ring-white dark:ring-gray-900">
+        <div className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 z-30">
+          <span className="flex items-center justify-center px-2 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[10px] font-bold text-white bg-gradient-to-r from-red-500 to-orange-500 rounded-br-xl rounded-tl-xl shadow-lg shadow-red-500/30 animate-pulse ring-2 ring-white dark:ring-gray-900">
             {badge}
           </span>
         </div>
       )}
       
       {/* 统计信息 Stats - 右上角 */}
-      <div className="absolute top-2 right-2 z-20 flex items-center gap-2 text-xs text-muted-foreground pointer-events-auto">
+      <div className="absolute top-2 right-2 z-20 flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground pointer-events-auto">
         <div className="flex items-center gap-1" title="浏览量">
-          <Eye className="h-3 w-3" />
+          <Eye className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
           <span>{views}</span>
         </div>
         <button
@@ -163,14 +163,14 @@ export default function SiteCard({
           className={`flex items-center gap-1 transition-colors hover:text-primary ${isLiked ? 'text-primary' : ''}`}
           title="推荐"
         >
-          <ThumbsUp className={`h-3 w-3 ${isLiked ? 'fill-current' : ''}`} />
+          <ThumbsUp className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${isLiked ? 'fill-current' : ''}`} />
           <span>{likes}</span>
         </button>
       </div>
 
       {/* 标签 Tags - 右侧垂直居中 */}
       {tags && tags.length > 0 && (
-        <div className="absolute top-1/2 right-2 -translate-y-1/2 flex flex-col gap-1 items-end z-20 pointer-events-none">
+        <div className="absolute top-1/2 right-2 -translate-y-1/2 flex flex-col gap-1 items-end z-20 pointer-events-none hidden sm:flex">
           {tags.map(tag => (
             <span key={tag.id} className={`pointer-events-auto text-[10px] px-1.5 py-0.5 rounded font-medium shadow-sm opacity-90 hover:opacity-100 transition-opacity ${colorMap[tag.color] || colorMap.blue}`}>
               {tag.name}
@@ -179,9 +179,9 @@ export default function SiteCard({
         </div>
       )}
 
-      <div className="flex items-start gap-4 relative z-10 w-full">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 relative z-10 w-full text-center sm:text-left">
         {/* 左侧图标 */}
-        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-white p-2.5 shadow-sm ring-1 ring-border/10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
+        <div className="relative h-10 w-10 sm:h-14 sm:w-14 shrink-0 overflow-hidden rounded-xl sm:rounded-2xl bg-white p-1.5 sm:p-2.5 shadow-sm ring-1 ring-border/10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
           {icon ? (
             isSvgCode ? (
               <div
@@ -220,18 +220,18 @@ export default function SiteCard({
         </div>
 
         {/* 右侧内容 */}
-        <div className="flex-1 min-w-0 pt-1 flex flex-col h-full pr-14">
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pt-0 sm:pt-1 flex flex-col h-full w-full sm:pr-14">
+          <div className="flex items-center sm:items-start justify-center sm:justify-between gap-2 mb-1">
+            <h3 className="font-bold text-sm sm:text-lg text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-1 min-w-0 justify-center sm:justify-start">
               <span className="truncate">{title}</span>
             </h3>
             
             {/* 外链图标 */}
-            <div className="opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 absolute right-2 bottom-2 z-30">
+            <div className="opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 absolute right-2 bottom-2 z-30 hidden sm:block">
               <ExternalLink className="h-4 w-4 text-primary" />
             </div>
           </div>
-          <p className={`text-sm text-muted-foreground leading-relaxed ${truncateDescription ? 'line-clamp-1' : 'line-clamp-3'}`}>
+          <p className={`text-xs sm:text-sm text-muted-foreground leading-relaxed ${truncateDescription ? 'line-clamp-1' : 'line-clamp-3'}`}>
             {description || '暂无描述'}
           </p>
         </div>
