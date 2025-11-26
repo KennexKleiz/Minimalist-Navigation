@@ -199,10 +199,10 @@ export default function Home() {
                 <span>探索数字世界的无限可能</span>
               </div>
               <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground/80 to-foreground/50">
-                {config.title}
+                {config.title || '极简智能导航'}
               </h1>
               <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                {config.subtitle}
+                {config.subtitle || '探索数字世界的无限可能'}
               </p>
             </motion.div>
 
