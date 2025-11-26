@@ -17,13 +17,17 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const config: any = await prisma.siteConfig.findFirst();
+    // 使用 raw query 获取配置，确保能获取到最新数据
+    const configs: any[] = await prisma.$queryRaw`SELECT * FROM SiteConfig LIMIT 1`;
+    const config = configs[0];
+    
     return {
       title: config?.title || "极简智能导航",
       description: config?.subtitle || "探索数字世界的无限可能",
       icons: config?.favicon ? { icon: config.favicon } : undefined,
     };
   } catch (error) {
+    console.error('Failed to generate metadata:', error);
     return {
       title: "极简智能导航",
       description: "探索数字世界的无限可能",
