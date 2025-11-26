@@ -75,6 +75,28 @@ export default function Dashboard() {
   const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
   const router = useRouter();
 
+  // 根据字符串生成固定的渐变色
+  const getGradientColor = (str: string) => {
+    const gradients = [
+      'from-blue-400 to-blue-600',
+      'from-green-400 to-green-600',
+      'from-purple-400 to-purple-600',
+      'from-yellow-400 to-orange-500',
+      'from-pink-400 to-rose-500',
+      'from-indigo-400 to-cyan-500',
+      'from-teal-400 to-emerald-500',
+      'from-red-400 to-pink-600'
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    const index = Math.abs(hash) % gradients.length;
+    return gradients[index];
+  };
+
   const showToast = (message: string, type: 'success' | 'error' | 'warning') => {
     const id = Date.now().toString();
     setToasts((prev) => [...prev, { id, message, type, onClose: removeToast }]);
@@ -1116,8 +1138,26 @@ export default function Dashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                               {section.sites.map((site, siteIdx) => (
                                 <div key={site.id || siteIdx} className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border/60 hover:border-primary/30 hover:shadow-sm transition-all group">
-                                  <div className="w-10 h-10 bg-muted/30 rounded-lg flex items-center justify-center text-xs border border-border/50 shrink-0 overflow-hidden">
-                                    {site.icon ? <img src={site.icon} className="w-full h-full object-contain" /> : <Globe className="w-5 h-5 text-muted-foreground/50" />}
+                                  <div className="w-10 h-10 bg-muted/30 rounded-lg flex items-center justify-center text-xs border border-border/50 shrink-0 overflow-hidden relative">
+                                    {site.icon ? (
+                                      <img
+                                        src={site.icon}
+                                        className="w-full h-full object-contain"
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+                                          const fallbackDiv = document.createElement('div');
+                                          const gradient = getGradientColor(site.title || '');
+                                          fallbackDiv.className = `flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient} text-white font-bold text-sm absolute inset-0`;
+                                          fallbackDiv.innerText = (site.title || '?').trim().charAt(0).toUpperCase();
+                                          target.parentElement?.appendChild(fallbackDiv);
+                                        }}
+                                      />
+                                    ) : (
+                                      <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${getGradientColor(site.title || '')} text-white font-bold text-sm`}>
+                                        {(site.title || '?').trim().charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">

@@ -64,6 +64,40 @@ export default function SiteCard({
   // 判断icon是否为SVG代码
   const isSvgCode = icon?.trim().startsWith('<svg');
 
+  // 获取首字母或首个汉字
+  const getFirstChar = (str: string) => {
+    const trimmed = str.trim();
+    if (!trimmed) return '?';
+    const firstChar = trimmed.charAt(0);
+    // 如果是英文字母，转大写
+    if (/[a-zA-Z]/.test(firstChar)) {
+      return firstChar.toUpperCase();
+    }
+    return firstChar;
+  };
+
+  // 根据字符串生成固定的渐变色
+  const getGradientColor = (str: string) => {
+    const gradients = [
+      'from-blue-400 to-blue-600',
+      'from-green-400 to-green-600',
+      'from-purple-400 to-purple-600',
+      'from-yellow-400 to-orange-500',
+      'from-pink-400 to-rose-500',
+      'from-indigo-400 to-cyan-500',
+      'from-teal-400 to-emerald-500',
+      'from-red-400 to-pink-600'
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    const index = Math.abs(hash) % gradients.length;
+    return gradients[index];
+  };
+
   const handleView = async () => {
     if (!id) return;
     try {
@@ -160,13 +194,23 @@ export default function SiteCard({
                 alt={title}
                 className="h-full w-full object-contain"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${url}&sz=64`;
+                  // 如果图片加载失败，隐藏图片并显示首字母
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.parentElement?.classList.add('fallback-icon');
+                  
+                  // 创建一个包含首字母的元素并插入
+                  const fallbackDiv = document.createElement('div');
+                  const gradient = getGradientColor(title);
+                  fallbackDiv.className = `flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient} text-white font-bold text-2xl absolute inset-0`;
+                  fallbackDiv.innerText = getFirstChar(title);
+                  target.parentElement?.appendChild(fallbackDiv);
                 }}
               />
             )
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary font-bold text-xl">
-              {title.charAt(0)}
+            <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${getGradientColor(title)} text-white font-bold text-2xl`}>
+              {getFirstChar(title)}
             </div>
           )}
         </div>
