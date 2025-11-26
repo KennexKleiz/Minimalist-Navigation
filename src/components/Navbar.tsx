@@ -15,9 +15,10 @@ interface Category {
 interface NavbarProps {
   title: string;
   categories: Category[];
+  logo?: string;
 }
 
-export default function Navbar({ title, categories }: NavbarProps) {
+export default function Navbar({ title, categories, logo }: NavbarProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -41,9 +42,17 @@ export default function Navbar({ title, categories }: NavbarProps) {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo Area */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-primary p-1.5 rounded-lg text-primary-foreground">
-              <Compass className="w-5 h-5" />
-            </div>
+            {logo ? (
+              <img
+                src={logo}
+                alt={title}
+                className="w-8 h-8 object-contain"
+              />
+            ) : (
+              <div className="bg-primary p-1.5 rounded-lg text-primary-foreground">
+                <Compass className="w-5 h-5" />
+              </div>
+            )}
             <span className="text-lg font-bold text-foreground tracking-tight">
               {title}
             </span>

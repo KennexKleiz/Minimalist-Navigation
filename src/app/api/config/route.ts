@@ -20,6 +20,7 @@ export async function GET() {
       truncateDescription: true,
       containerMaxWidth: '1440px',
       favicon: '',
+      logo: '',
       backgroundImage: '',
       backgroundImages: '[]',
       backgroundMode: 'fixed',
@@ -41,6 +42,7 @@ export async function PUT(request: Request) {
       truncateDescription,
       containerMaxWidth,
       favicon,
+      logo,
       backgroundImage,
       backgroundImages,
       backgroundMode,
@@ -63,6 +65,7 @@ export async function PUT(request: Request) {
             truncateDescription = ${truncateDescription ? 1 : 0},
             containerMaxWidth = ${containerMaxWidth},
             favicon = ${favicon || null},
+            logo = ${logo || null},
             backgroundImage = ${backgroundImage || null},
             backgroundImages = ${backgroundImages || '[]'},
             backgroundMode = ${backgroundMode || 'fixed'},
@@ -75,8 +78,8 @@ export async function PUT(request: Request) {
       `;
     } else {
       await prisma.$executeRaw`
-        INSERT INTO SiteConfig (id, title, subtitle, gridColumns, truncateDescription, containerMaxWidth, favicon, backgroundImage, backgroundImages, backgroundMode, footerHtml, webdavUrl, webdavUsername, webdavPassword, updatedAt)
-        VALUES (1, ${title}, ${subtitle}, ${gridColumns}, ${truncateDescription ? 1 : 0}, ${containerMaxWidth}, ${favicon || null}, ${backgroundImage || null}, ${backgroundImages || '[]'}, ${backgroundMode || 'fixed'}, ${footerHtml || null}, ${webdavUrl || null}, ${webdavUsername || null}, ${webdavPassword || null}, ${new Date()})
+        INSERT INTO SiteConfig (id, title, subtitle, gridColumns, truncateDescription, containerMaxWidth, favicon, logo, backgroundImage, backgroundImages, backgroundMode, footerHtml, webdavUrl, webdavUsername, webdavPassword, updatedAt)
+        VALUES (1, ${title}, ${subtitle}, ${gridColumns}, ${truncateDescription ? 1 : 0}, ${containerMaxWidth}, ${favicon || null}, ${logo || null}, ${backgroundImage || null}, ${backgroundImages || '[]'}, ${backgroundMode || 'fixed'}, ${footerHtml || null}, ${webdavUrl || null}, ${webdavUsername || null}, ${webdavPassword || null}, ${new Date()})
       `;
     }
     

@@ -40,6 +40,7 @@ interface Category {
 interface Config {
   title: string;
   subtitle: string;
+  logo?: string;
   gridColumns?: number;
   truncateDescription?: boolean;
   containerMaxWidth?: string;
@@ -203,7 +204,7 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar title={config.title} categories={allCategories} />
+      <Navbar title={config.title} categories={allCategories} logo={config.logo} />
 
       {/* Hero Section */}
       <header className="relative py-12 sm:py-20">

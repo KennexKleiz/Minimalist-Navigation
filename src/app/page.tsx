@@ -38,6 +38,7 @@ interface Category {
 interface Config {
   title: string;
   subtitle: string;
+  logo?: string;
   backgroundImage?: string;
   backgroundImages?: string;
   backgroundMode?: string;
@@ -163,7 +164,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 selection:bg-primary/20">
-      <Navbar title={config.title} categories={categories} />
+      <Navbar title={config.title} categories={categories} logo={config.logo} />
 
       {/* Hero Section */}
       <header className="relative pt-20 pb-24 sm:pt-32 sm:pb-36">

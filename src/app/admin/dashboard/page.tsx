@@ -51,6 +51,7 @@ export default function Dashboard() {
     truncateDescription: true,
     containerMaxWidth: '1440px',
     favicon: '',
+    logo: '',
     backgroundImage: '',
     backgroundImages: '[]',
     backgroundMode: 'fixed',
@@ -221,7 +222,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'favicon' | 'backgroundImage' | 'backgroundImages') => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'favicon' | 'logo' | 'backgroundImage' | 'backgroundImages') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -629,6 +630,35 @@ export default function Dashboard() {
                         type="file"
                         accept="image/*"
                         onChange={(e) => handleFileUpload(e, 'favicon')}
+                        className="text-sm text-muted-foreground file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                        disabled={uploading}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">网站 Logo</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 border border-border rounded-lg flex items-center justify-center bg-muted/30 overflow-hidden">
+                      {config.logo ? (
+                        <img src={config.logo} alt="Logo" className="w-full h-full object-contain" />
+                      ) : (
+                        <Layout className="w-6 h-6 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={config.logo || ''}
+                        onChange={(e) => setConfig({ ...config, logo: e.target.value })}
+                        placeholder="输入图片链接或上传"
+                        className="w-full p-2 border border-border rounded-lg bg-background text-sm mb-2"
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'logo')}
                         className="text-sm text-muted-foreground file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                         disabled={uploading}
                       />

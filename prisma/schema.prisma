@@ -26,6 +26,7 @@ model SiteConfig {
   truncateDescription Boolean  @default(true)
   containerMaxWidth   String   @default("1440px")
   favicon             String?
+  logo                String?
   backgroundImage     String?
   backgroundImages    String?  // JSON string of URLs
   backgroundMode      String   @default("fixed") // "fixed" or "random"
