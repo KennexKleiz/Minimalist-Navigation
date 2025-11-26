@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
 import { prisma } from "@/lib/prisma";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
+// 强制动态渲染，确保 metadata 始终是最新的
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateMetadata(): Promise<Metadata> {
   try {
     // 使用 raw query 获取配置，确保能获取到最新数据
