@@ -26,7 +26,9 @@ export async function GET() {
       backgroundImage: '',
       backgroundImages: '[]',
       backgroundMode: 'fixed',
-      footerHtml: DEFAULT_FOOTER_HTML
+      footerHtml: DEFAULT_FOOTER_HTML,
+      siteTitleFontSize: 16,
+      siteDescriptionFontSize: 12
     });
   } catch (error) {
     console.error('Error fetching config:', error);
@@ -51,7 +53,9 @@ export async function PUT(request: Request) {
       footerHtml,
       webdavUrl,
       webdavUsername,
-      webdavPassword
+      webdavPassword,
+      siteTitleFontSize,
+      siteDescriptionFontSize
     } = body;
 
     // 使用 raw query 更新配置
@@ -75,13 +79,15 @@ export async function PUT(request: Request) {
             webdavUrl = ${webdavUrl || null},
             webdavUsername = ${webdavUsername || null},
             webdavPassword = ${webdavPassword || null},
+            siteTitleFontSize = ${siteTitleFontSize || 16},
+            siteDescriptionFontSize = ${siteDescriptionFontSize || 12},
             updatedAt = ${new Date()}
         WHERE id = 1
       `;
     } else {
       await prisma.$executeRaw`
-        INSERT INTO SiteConfig (id, title, subtitle, gridColumns, truncateDescription, containerMaxWidth, favicon, logo, backgroundImage, backgroundImages, backgroundMode, footerHtml, webdavUrl, webdavUsername, webdavPassword, updatedAt)
-        VALUES (1, ${title}, ${subtitle}, ${gridColumns}, ${truncateDescription ? 1 : 0}, ${containerMaxWidth}, ${favicon || null}, ${logo || null}, ${backgroundImage || null}, ${backgroundImages || '[]'}, ${backgroundMode || 'fixed'}, ${footerHtml || null}, ${webdavUrl || null}, ${webdavUsername || null}, ${webdavPassword || null}, ${new Date()})
+        INSERT INTO SiteConfig (id, title, subtitle, gridColumns, truncateDescription, containerMaxWidth, favicon, logo, backgroundImage, backgroundImages, backgroundMode, footerHtml, webdavUrl, webdavUsername, webdavPassword, siteTitleFontSize, siteDescriptionFontSize, updatedAt)
+        VALUES (1, ${title}, ${subtitle}, ${gridColumns}, ${truncateDescription ? 1 : 0}, ${containerMaxWidth}, ${favicon || null}, ${logo || null}, ${backgroundImage || null}, ${backgroundImages || '[]'}, ${backgroundMode || 'fixed'}, ${footerHtml || null}, ${webdavUrl || null}, ${webdavUsername || null}, ${webdavPassword || null}, ${siteTitleFontSize || 16}, ${siteDescriptionFontSize || 12}, ${new Date()})
       `;
     }
     

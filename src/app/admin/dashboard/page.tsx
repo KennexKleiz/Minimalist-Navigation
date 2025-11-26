@@ -58,7 +58,9 @@ export default function Dashboard() {
     footerHtml: '',
     webdavUrl: '',
     webdavUsername: '',
-    webdavPassword: ''
+    webdavPassword: '',
+    siteTitleFontSize: 16,
+    siteDescriptionFontSize: 12
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -611,6 +613,29 @@ export default function Dashboard() {
                     value={config.containerMaxWidth}
                     onChange={(e) => setConfig({ ...config, containerMaxWidth: e.target.value })}
                     placeholder="例如: 1440px 或 100%"
+                    className="w-full p-2 border border-border rounded-lg bg-background"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">网站标题字体大小 (px)</label>
+                  <input
+                    type="number"
+                    value={config.siteTitleFontSize}
+                    onChange={(e) => setConfig({ ...config, siteTitleFontSize: parseInt(e.target.value) })}
+                    placeholder="默认: 16"
+                    className="w-full p-2 border border-border rounded-lg bg-background"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">网站描述字体大小 (px)</label>
+                  <input
+                    type="number"
+                    value={config.siteDescriptionFontSize}
+                    onChange={(e) => setConfig({ ...config, siteDescriptionFontSize: parseInt(e.target.value) })}
+                    placeholder="默认: 12"
                     className="w-full p-2 border border-border rounded-lg bg-background"
                   />
                 </div>

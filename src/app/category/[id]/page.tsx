@@ -47,6 +47,8 @@ interface Config {
   backgroundImage?: string;
   backgroundImages?: string;
   backgroundMode?: string;
+  siteTitleFontSize?: number;
+  siteDescriptionFontSize?: number;
 }
 
 export default function CategoryPage() {
@@ -425,6 +427,8 @@ export default function CategoryPage() {
                               truncateDescription={config.truncateDescription}
                               initialLikes={site.likes || 0}
                               initialViews={site.views || 0}
+                              titleFontSize={config.siteTitleFontSize}
+                              descriptionFontSize={config.siteDescriptionFontSize}
                             />
                           </motion.div>
                         ))}

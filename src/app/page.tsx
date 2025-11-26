@@ -42,6 +42,8 @@ interface Config {
   backgroundImage?: string;
   backgroundImages?: string;
   backgroundMode?: string;
+  siteTitleFontSize?: number;
+  siteDescriptionFontSize?: number;
 }
 
 export default function Home() {
@@ -291,6 +293,8 @@ export default function Home() {
                     <SiteCard
                       {...site}
                       truncateDescription={true} // 搜索结果默认截断
+                      titleFontSize={config.siteTitleFontSize}
+                      descriptionFontSize={config.siteDescriptionFontSize}
                     />
                   </motion.div>
                 ))}

@@ -23,6 +23,8 @@ interface SiteCardProps {
   initialViews?: number;
   badge?: string | null;
   tags?: Tag[];
+  titleFontSize?: number;
+  descriptionFontSize?: number;
 }
 
 const colorMap: Record<string, string> = {
@@ -46,7 +48,9 @@ export default function SiteCard({
   initialLikes = 0,
   initialViews = 0,
   badge,
-  tags
+  tags,
+  titleFontSize,
+  descriptionFontSize
 }: SiteCardProps) {
   const [likes, setLikes] = useState(initialLikes);
   const [views, setViews] = useState(initialViews);
@@ -133,7 +137,7 @@ export default function SiteCard({
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleView}
-      className="group relative flex flex-col h-full rounded-2xl border border-border/50 bg-card p-3 sm:p-5 transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1"
+      className="group relative flex flex-col h-full rounded-2xl border border-border/50 bg-card p-3 sm:p-5 transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:z-50"
     >
       {/* 背景和装饰容器 - 负责裁剪 */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
@@ -222,7 +226,10 @@ export default function SiteCard({
         {/* 右侧内容 */}
         <div className="flex-1 min-w-0 pt-0 sm:pt-1 flex flex-col h-full w-full sm:pr-14">
           <div className="flex items-center sm:items-start justify-center sm:justify-between gap-2 mb-1">
-            <h3 className="font-bold text-sm sm:text-lg text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-1 min-w-0 justify-center sm:justify-start">
+            <h3
+              className="font-bold text-sm sm:text-lg text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-1 min-w-0 justify-center sm:justify-start"
+              style={titleFontSize ? { fontSize: `${titleFontSize}px` } : undefined}
+            >
               <span className="truncate">{title}</span>
             </h3>
             
@@ -231,21 +238,13 @@ export default function SiteCard({
               <ExternalLink className="h-4 w-4 text-primary" />
             </div>
           </div>
-          <div className="relative">
-            <p
-              className={`text-xs sm:text-sm text-muted-foreground leading-relaxed ${truncateDescription ? 'line-clamp-1' : 'line-clamp-3'} ${truncateDescription ? 'group-hover:opacity-0' : ''}`}
-              title={description || ''}
-            >
-              {description || '暂无描述'}
-            </p>
-            {truncateDescription && description && (
-              <div className="absolute top-0 left-0 w-[calc(100%+1rem)] -ml-2 -mt-2 p-2 bg-popover/95 backdrop-blur-sm rounded-lg shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none group-hover:pointer-events-auto">
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  {description}
-                </p>
-              </div>
-            )}
-          </div>
+          <p
+            className={`text-xs sm:text-sm text-muted-foreground leading-relaxed ${truncateDescription ? 'line-clamp-1 group-hover:line-clamp-none' : 'line-clamp-3'}`}
+            title={description || ''}
+            style={descriptionFontSize ? { fontSize: `${descriptionFontSize}px` } : undefined}
+          >
+            {description || '暂无描述'}
+          </p>
         </div>
       </div>
     </motion.a>
