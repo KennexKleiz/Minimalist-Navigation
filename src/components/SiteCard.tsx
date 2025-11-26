@@ -231,9 +231,21 @@ export default function SiteCard({
               <ExternalLink className="h-4 w-4 text-primary" />
             </div>
           </div>
-          <p className={`text-xs sm:text-sm text-muted-foreground leading-relaxed ${truncateDescription ? 'line-clamp-1' : 'line-clamp-3'}`}>
-            {description || '暂无描述'}
-          </p>
+          <div className="relative">
+            <p
+              className={`text-xs sm:text-sm text-muted-foreground leading-relaxed ${truncateDescription ? 'line-clamp-1' : 'line-clamp-3'} ${truncateDescription ? 'group-hover:opacity-0' : ''}`}
+              title={description || ''}
+            >
+              {description || '暂无描述'}
+            </p>
+            {truncateDescription && description && (
+              <div className="absolute top-0 left-0 w-[calc(100%+1rem)] -ml-2 -mt-2 p-2 bg-popover/95 backdrop-blur-sm rounded-lg shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none group-hover:pointer-events-auto">
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  {description}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </motion.a>
