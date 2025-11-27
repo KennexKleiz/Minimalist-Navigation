@@ -60,7 +60,8 @@ export default function Dashboard() {
     webdavUsername: '',
     webdavPassword: '',
     siteTitleFontSize: 16,
-    siteDescriptionFontSize: 12
+    siteDescriptionFontSize: 12,
+    showDescriptionOnHover: true
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -641,17 +642,31 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="truncateDescription"
-                  checked={config.truncateDescription}
-                  onChange={(e) => setConfig({ ...config, truncateDescription: e.target.checked })}
-                  className="rounded border-border"
-                />
-                <label htmlFor="truncateDescription" className="text-sm font-medium">
-                  描述只显示一行（多余截断）
-                </label>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="truncateDescription"
+                    checked={config.truncateDescription}
+                    onChange={(e) => setConfig({ ...config, truncateDescription: e.target.checked })}
+                    className="rounded border-border"
+                  />
+                  <label htmlFor="truncateDescription" className="text-sm font-medium">
+                    描述只显示一行（多余截断）
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="showDescriptionOnHover"
+                    checked={config.showDescriptionOnHover}
+                    onChange={(e) => setConfig({ ...config, showDescriptionOnHover: e.target.checked })}
+                    className="rounded border-border"
+                  />
+                  <label htmlFor="showDescriptionOnHover" className="text-sm font-medium">
+                    鼠标悬停时显示完整描述
+                  </label>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border">

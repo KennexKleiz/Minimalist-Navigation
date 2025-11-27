@@ -6,7 +6,8 @@
       "Bash(npm install --save-dev @types/bcryptjs)",
       "Bash(npx prisma db seed)",
       "Bash(npm i -D ts-node typescript @types/node)",
-      "Bash(if exist \"d:\\phpstudy_pro\\WWW\\daohang.localhost\\.next\\dev\\lock\" del \"d:\\phpstudy_pro\\WWW\\daohang.localhost\\.next\\dev\\lock\")"
+      "Bash(if exist \"d:\\phpstudy_pro\\WWW\\daohang.localhost\\.next\\dev\\lock\" del \"d:\\phpstudy_pro\\WWW\\daohang.localhost\\.next\\dev\\lock\")",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

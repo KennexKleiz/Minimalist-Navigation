@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ExternalLink, ThumbsUp, Eye } from 'lucide-react';
 import axios from 'axios';
+import { useTheme } from 'next-themes';
 
 interface Tag {
   id: number;
@@ -25,6 +26,7 @@ interface SiteCardProps {
   tags?: Tag[];
   titleFontSize?: number;
   descriptionFontSize?: number;
+  showDescriptionOnHover?: boolean;
 }
 
 const colorMap: Record<string, string> = {
@@ -50,11 +52,18 @@ export default function SiteCard({
   badge,
   tags,
   titleFontSize,
-  descriptionFontSize
+  descriptionFontSize,
+  showDescriptionOnHover = true
 }: SiteCardProps) {
   const [likes, setLikes] = useState(initialLikes);
   const [views, setViews] = useState(initialViews);
   const [isLiked, setIsLiked] = useState(false);
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -64,6 +73,8 @@ export default function SiteCard({
       }
     }
   }, [id]);
+
+  const isDark = mounted && (resolvedTheme === 'dark' || theme === 'dark');
 
   // 判断icon是否为SVG代码
   const isSvgCode = icon?.trim().startsWith('<svg');
@@ -240,15 +251,22 @@ export default function SiteCard({
           </div>
           <div className="relative">
             <p
-              className={`text-xs sm:text-sm text-muted-foreground leading-relaxed ${truncateDescription ? 'line-clamp-1 group-hover:opacity-0' : 'line-clamp-3'}`}
+              className={`text-xs sm:text-sm text-muted-foreground leading-relaxed ${truncateDescription ? (showDescriptionOnHover ? 'line-clamp-1 group-hover:opacity-0' : 'line-clamp-1') : 'line-clamp-3'}`}
               style={descriptionFontSize ? { fontSize: `${descriptionFontSize}px` } : undefined}
             >
               {description || '暂无描述'}
             </p>
-            {truncateDescription && description && (
+            {truncateDescription && description && showDescriptionOnHover && (
               <p
-                className="absolute top-0 left-0 w-full text-xs sm:text-sm text-muted-foreground leading-relaxed hidden group-hover:block z-20 bg-gray-50/95 dark:bg-gray-900/95 p-1 -m-1 rounded-md shadow-sm"
-                style={descriptionFontSize ? { fontSize: `${descriptionFontSize}px` } : undefined}
+                className="absolute top-0 left-0 w-full text-xs sm:text-sm leading-relaxed hidden group-hover:block z-50 p-2 -m-2 rounded-md shadow-xl"
+                style={{
+                  fontSize: descriptionFontSize ? `${descriptionFontSize}px` : undefined,
+                  backgroundColor: isDark ? '#18181b' : '#ffffff',
+                  color: isDark ? '#fafafa' : '#374151',
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  borderColor: isDark ? '#3f3f46' : '#e5e7eb'
+                }}
               >
                 {description}
               </p>

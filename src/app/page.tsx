@@ -44,6 +44,7 @@ interface Config {
   backgroundMode?: string;
   siteTitleFontSize?: number;
   siteDescriptionFontSize?: number;
+  showDescriptionOnHover?: boolean;
 }
 
 export default function Home() {

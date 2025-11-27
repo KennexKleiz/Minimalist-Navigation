@@ -36,6 +36,7 @@ model SiteConfig {
   webdavPassword      String?
   siteTitleFontSize       Int      @default(16)
   siteDescriptionFontSize Int      @default(12)
+  showDescriptionOnHover  Boolean  @default(true)
   updatedAt           DateTime @updatedAt
 }
 

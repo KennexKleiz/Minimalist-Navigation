@@ -49,6 +49,7 @@ interface Config {
   backgroundMode?: string;
   siteTitleFontSize?: number;
   siteDescriptionFontSize?: number;
+  showDescriptionOnHover?: boolean;
 }
 
 export default function CategoryPage() {
@@ -429,6 +430,7 @@ export default function CategoryPage() {
                               initialViews={site.views || 0}
                               titleFontSize={config.siteTitleFontSize}
                               descriptionFontSize={config.siteDescriptionFontSize}
+                              showDescriptionOnHover={config.showDescriptionOnHover}
                             />
                           </motion.div>
                         ))}
