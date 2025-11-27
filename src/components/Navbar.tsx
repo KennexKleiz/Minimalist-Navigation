@@ -38,80 +38,125 @@ export default function Navbar({ title, categories, logo }: NavbarProps) {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          {/* Logo Area */}
-          <Link href="/" className="flex items-center gap-2 group">
-            {logo ? (
-              <img
-                src={logo}
-                alt={title}
-                className="w-8 h-8 object-contain"
-              />
-            ) : (
-              <div className="bg-primary p-1.5 rounded-lg text-primary-foreground">
-                <Compass className="w-5 h-5" />
-              </div>
-            )}
-            <span className="text-lg font-bold text-foreground tracking-tight">
-              {title}
-            </span>
-          </Link>
+      <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-2xl border-b border-border/30 shadow-2xl">
+        {/* 动态渐变背景 */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-purple-500/5 to-pink-500/5 opacity-50" />
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            <Link
-              href="/"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === '/' ? 'text-primary' : 'text-muted-foreground'
-              }`}
-            >
-              首页
+        {/* 顶部多彩渐变线 */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 opacity-80" />
+
+        {/* 底部光晕效果 */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between relative">
+          {/* Logo Area - 增强版 */}
+          <motion.div
+            initial={{ opacity: 0, x: -30, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.6, type: "spring" }}
+          >
+            <Link href="/" className="flex items-center gap-3 group relative">
+              <div className="relative">
+                {logo ? (
+                  <motion.img
+                    src={logo}
+                    alt={title}
+                    className="w-10 h-10 object-contain relative z-10"
+                    whileHover={{ scale: 1.15, rotate: 8 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  />
+                ) : (
+                  <motion.div
+                    className="relative bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600 p-2 rounded-xl text-white shadow-2xl"
+                    whileHover={{ scale: 1.15, rotate: 8 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  >
+                    <Compass className="w-6 h-6 relative z-10" />
+                    {/* 发光效果 */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl blur-md opacity-60 group-hover:opacity-100 transition-opacity" />
+                  </motion.div>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-black text-foreground tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:via-purple-600 group-hover:to-pink-600 transition-all duration-300">
+                  {title}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium tracking-wider">NAVIGATION</span>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Desktop Navigation - 胶囊式设计 */}
+          <div className="hidden md:flex items-center gap-2 bg-muted/50 backdrop-blur-sm rounded-full px-2 py-1.5 border border-border/50 shadow-inner">
+            <Link href="/" className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full">
+              <span className={pathname === '/' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}>
+                首页
+              </span>
+              {pathname === '/' && (
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 rounded-full border border-primary/30" />
+              )}
             </Link>
             {categories.map((cat) => (
               <Link
                 key={cat.id}
                 href={`/category/${cat.id}`}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === `/category/${cat.id}` ? 'text-primary' : 'text-muted-foreground'
-                }`}
+                className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full"
               >
-                {cat.name}
+                <span className={pathname === `/category/${cat.id}` ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}>
+                  {cat.name}
+                </span>
+                {pathname === `/category/${cat.id}` && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 rounded-full border border-primary/30" />
+                )}
               </Link>
             ))}
           </div>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-4">
+          {/* Right Actions - 增强版 */}
+          <div className="flex items-center gap-3">
             {mounted && (
-              <button
+              <motion.button
                 onClick={toggleTheme}
-                className="p-2 text-muted-foreground hover:bg-muted rounded-lg transition-colors"
+                className="relative p-2.5 text-muted-foreground hover:text-primary rounded-xl transition-all overflow-hidden group"
                 aria-label="Toggle theme"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9, rotate: 360 }}
+                transition={{ type: "spring", stiffness: 500 }}
               >
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 {theme === 'dark' ? (
-                  <Moon className="w-5 h-5" />
+                  <Moon className="w-5 h-5 relative z-10" />
                 ) : (
-                  <Sun className="w-5 h-5" />
+                  <Sun className="w-5 h-5 relative z-10" />
                 )}
-              </button>
+              </motion.button>
             )}
 
-            <Link
-              href="/admin/login"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 500 }}
             >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">管理后台</span>
-            </Link>
-            
+              <Link
+                href="/admin/login"
+                className="relative flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-primary via-purple-600 to-pink-600 rounded-xl transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Settings className="w-4 h-4 relative z-10" />
+                <span className="hidden sm:inline relative z-10">管理后台</span>
+                {/* 闪光效果 */}
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+              </Link>
+            </motion.div>
+
             {/* Mobile Menu Button */}
-            <button
+            <motion.button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-muted-foreground hover:bg-muted rounded-lg"
+              className="md:hidden p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
+              whileTap={{ scale: 0.85, rotate: 90 }}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            </motion.button>
           </div>
         </div>
       </nav>
