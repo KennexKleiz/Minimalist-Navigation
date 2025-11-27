@@ -61,11 +61,12 @@ export default function Dashboard() {
     webdavPassword: '',
     siteTitleFontSize: 16,
     siteDescriptionFontSize: 12,
-    showDescriptionOnHover: true
+    showDescriptionOnHover: true,
+    showTools: false
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password' | 'tags' | 'backup'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password' | 'tags' | 'tools' | 'backup'>('content');
   const [webdavBackups, setWebdavBackups] = useState<any[]>([]);
   const [webdavLoading, setWebdavLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -527,6 +528,14 @@ export default function Dashboard() {
             <TagIcon className="w-4 h-4" /> 标签管理
           </button>
           <button
+            onClick={() => setActiveTab('tools')}
+            className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'tools' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+            }`}
+          >
+            <Settings className="w-4 h-4" /> 工具管理
+          </button>
+          <button
             onClick={() => setActiveTab('settings')}
             className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
               activeTab === 'settings' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
@@ -665,6 +674,18 @@ export default function Dashboard() {
                   />
                   <label htmlFor="showDescriptionOnHover" className="text-sm font-medium">
                     鼠标悬停时显示完整描述
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="showTools"
+                    checked={config.showTools}
+                    onChange={(e) => setConfig({ ...config, showTools: e.target.checked })}
+                    className="rounded border-border"
+                  />
+                  <label htmlFor="showTools" className="text-sm font-medium">
+                    显示在线工具入口
                   </label>
                 </div>
               </div>
@@ -1041,6 +1062,12 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+        ) : activeTab === 'tools' ? (
+          <iframe
+            src="/admin/tools"
+            className="w-full h-[calc(100vh-120px)] border-0 rounded-xl bg-background"
+            title="工具管理"
+          />
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">

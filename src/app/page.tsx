@@ -45,6 +45,7 @@ interface Config {
   siteTitleFontSize?: number;
   siteDescriptionFontSize?: number;
   showDescriptionOnHover?: boolean;
+  showTools?: boolean;
 }
 
 export default function Home() {
@@ -167,7 +168,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 selection:bg-primary/20">
-      <Navbar title={config.title} categories={categories} logo={config.logo} />
+      <Navbar title={config.title} categories={categories} logo={config.logo} showTools={config.showTools} />
 
       {/* Hero Section */}
       <header className="relative pt-20 pb-24 sm:pt-32 sm:pb-36">

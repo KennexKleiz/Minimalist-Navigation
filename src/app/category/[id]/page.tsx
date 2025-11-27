@@ -50,6 +50,7 @@ interface Config {
   siteTitleFontSize?: number;
   siteDescriptionFontSize?: number;
   showDescriptionOnHover?: boolean;
+  showTools?: boolean;
 }
 
 export default function CategoryPage() {
@@ -207,7 +208,7 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar title={config.title} categories={allCategories} logo={config.logo} />
+      <Navbar title={config.title} categories={allCategories} logo={config.logo} showTools={config.showTools} />
 
       {/* Hero Section */}
       <header className="relative py-12 sm:py-20">

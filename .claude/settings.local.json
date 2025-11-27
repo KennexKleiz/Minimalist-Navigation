@@ -7,7 +7,12 @@
       "Bash(npx prisma db seed)",
       "Bash(npm i -D ts-node typescript @types/node)",
       "Bash(if exist \"d:\\phpstudy_pro\\WWW\\daohang.localhost\\.next\\dev\\lock\" del \"d:\\phpstudy_pro\\WWW\\daohang.localhost\\.next\\dev\\lock\")",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npm run build)",
+      "Bash(if exist:*)",
+      "Bash(npx prisma generate:*)"
     ],
     "deny": [],
     "ask": []

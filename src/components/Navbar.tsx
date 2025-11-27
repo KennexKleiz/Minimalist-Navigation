@@ -16,9 +16,10 @@ interface NavbarProps {
   title: string;
   categories: Category[];
   logo?: string;
+  showTools?: boolean;
 }
 
-export default function Navbar({ title, categories, logo }: NavbarProps) {
+export default function Navbar({ title, categories, logo, showTools = false }: NavbarProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -110,6 +111,16 @@ export default function Navbar({ title, categories, logo }: NavbarProps) {
                 )}
               </Link>
             ))}
+            {showTools && (
+              <Link href="/tools" className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full">
+                <span className={pathname === '/tools' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}>
+                  在线工具
+                </span>
+                {pathname === '/tools' && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 rounded-full border border-primary/30" />
+                )}
+              </Link>
+            )}
           </div>
 
           {/* Right Actions - 增强版 */}

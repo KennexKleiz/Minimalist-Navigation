@@ -37,6 +37,7 @@ model SiteConfig {
   siteTitleFontSize       Int      @default(16)
   siteDescriptionFontSize Int      @default(12)
   showDescriptionOnHover  Boolean  @default(true)
+  showTools           Boolean  @default(false)
   updatedAt           DateTime @updatedAt
 }
 
@@ -97,4 +98,26 @@ model Like {
   site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@unique([siteId, ip])
+}
+
+model ToolCategory {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sortOrder Int      @default(0)
+  tools     Tool[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tool {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String?
+  code        String
+  icon        String?
+  categoryId  Int
+  category    ToolCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
