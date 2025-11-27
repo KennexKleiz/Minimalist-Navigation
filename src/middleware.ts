@@ -22,9 +22,16 @@ export function middleware(request: NextRequest) {
       '/api/ai/recommend',
       '/api/sections/verify',
       '/api/sites/interact',
-      '/api/sites/rankings'
+      '/api/sites/rankings',
+      '/api/tools',
+      '/api/tools/categories'
     ];
-    const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname === route);
+    
+    // Check if it's a public route or a tools GET request
+    const isPublicRoute = publicRoutes.some(route => 
+      request.nextUrl.pathname === route || 
+      request.nextUrl.pathname === route + '/'
+    ) || (request.nextUrl.pathname.startsWith('/api/tools') && request.method === 'GET');
 
     // Only check authentication for non-public routes
     if (!isPublicRoute) {

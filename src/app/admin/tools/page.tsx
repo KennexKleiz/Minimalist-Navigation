@@ -4,33 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Tool, ToolCategory } from '@prisma/client';
 import ToolEditor from '@/components/ToolEditor';
 import EnhancedToolEditor from '@/components/EnhancedToolEditor';
 
-interface Tool {
-  id: number;
-  name: string;
-  description: string | null;
-  code: string;
-  icon: string | null;
-  categoryId: number;
-  sortOrder: number;
-}
-
-interface ToolCategory {
-  id: number;
-  name: string;
-  sortOrder: number;
-  tools: Tool[];
-}
-
 export default function ToolsManagementPage() {
   const router = useRouter();
-  const [categories, setCategories] = useState<ToolCategory[]>([]);
+  const [categories, setCategories] = useState<(ToolCategory & { tools: Tool[] })[]>([]);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showToolModal, setShowToolModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ToolCategory | null>(null);
-  const [editingTool, setEditingTool] = useState<Tool | null>(null);
+  const [editingTool, setEditingTool] = useState<(Tool & { category?: ToolCategory }) | undefined>(undefined);
   const [categoryForm, setCategoryForm] = useState({ name: '', sortOrder: 0 });
   const [toolForm, setToolForm] = useState({
     name: '',
@@ -99,7 +83,7 @@ export default function ToolsManagementPage() {
       fetchCategories();
       setShowToolModal(false);
       setToolForm({ name: '', description: '', code: '', icon: '', categoryId: 0, sortOrder: 0 });
-      setEditingTool(null);
+      setEditingTool(undefined);
     } catch (error) {
       alert('操作失败');
     }
@@ -138,7 +122,7 @@ export default function ToolsManagementPage() {
         sortOrder: tool.sortOrder
       });
     } else {
-      setEditingTool(null);
+      setEditingTool(undefined);
       setToolForm({
         name: '',
         description: '',
@@ -329,14 +313,14 @@ export default function ToolsManagementPage() {
                   }
                   fetchCategories();
                   setShowToolModal(false);
-                  setEditingTool(null);
+                  setEditingTool(undefined);
                 } catch (error) {
                   alert('操作失败');
                 }
               }}
               onCancel={() => {
                 setShowToolModal(false);
-                setEditingTool(null);
+                setEditingTool(undefined);
               }}
             />
           </div>
