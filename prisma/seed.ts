@@ -3,9 +3,29 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // 1. 清理现有数据（可选，如果要从头开始）
-  await prisma.tool.deleteMany();
-  await prisma.toolCategory.deleteMany();
+  // 检查是否已有工具数据
+  const existingToolsCount = await prisma.tool.count();
+  const existingCategoriesCount = await prisma.toolCategory.count();
+
+  if (existingToolsCount > 0 || existingCategoriesCount > 0) {
+    console.log('⚠️  检测到现有数据:');
+    console.log(`   - 工具分类: ${existingCategoriesCount} 个`);
+    console.log(`   - 工具: ${existingToolsCount} 个`);
+    console.log('');
+    console.log('为了保护现有数据，种子脚本已跳过。');
+    console.log('');
+    console.log('如果你想重置所有工具数据，请手动删除后再运行：');
+    console.log('  1. 进入管理后台删除所有工具');
+    console.log('  2. 或者在 seed.ts 中取消注释删除代码');
+    console.log('');
+    return;
+  }
+
+  console.log('✓ 数据库为空，开始导入内置工具...');
+
+  // 如果需要强制重置，取消下面两行的注释：
+  // await prisma.tool.deleteMany();
+  // await prisma.toolCategory.deleteMany();
 
   // 2. 创建工具分类
   const textCategory = await prisma.toolCategory.create({

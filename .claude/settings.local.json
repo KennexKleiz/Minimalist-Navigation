@@ -13,7 +13,9 @@
       "Bash(npm run build)",
       "Bash(if exist:*)",
       "Bash(npx prisma generate:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

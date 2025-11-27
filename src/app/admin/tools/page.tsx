@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Download } from 'lucide-react';
 import { Tool, ToolCategory } from '@prisma/client';
 import ToolEditor from '@/components/ToolEditor';
 import EnhancedToolEditor from '@/components/EnhancedToolEditor';
@@ -16,6 +16,7 @@ export default function ToolsManagementPage() {
   const [editingCategory, setEditingCategory] = useState<ToolCategory | null>(null);
   const [editingTool, setEditingTool] = useState<(Tool & { category?: ToolCategory }) | undefined>(undefined);
   const [categoryForm, setCategoryForm] = useState({ name: '', sortOrder: 0 });
+  const [isImporting, setIsImporting] = useState(false);
   const [toolForm, setToolForm] = useState({
     name: '',
     description: '',
@@ -99,6 +100,36 @@ export default function ToolsManagementPage() {
     }
   };
 
+  const handleImportDefaults = async () => {
+    const totalTools = categories.reduce((sum, cat) => sum + cat.tools.length, 0);
+
+    if (totalTools > 0) {
+      if (!confirm(`当前已有 ${categories.length} 个分类和 ${totalTools} 个工具。\n\n导入内置工具需要先清空所有现有工具。\n\n是否继续？`)) {
+        return;
+      }
+    } else {
+      if (!confirm('确定要导入内置工具吗？\n\n将导入 4 个分类和 10+ 个实用工具。')) {
+        return;
+      }
+    }
+
+    setIsImporting(true);
+    try {
+      const response = await axios.post('/api/tools/import-defaults');
+      alert(`✅ ${response.data.message}`);
+      fetchCategories();
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        alert(`❌ ${error.response.data.message}`);
+      } else {
+        alert('❌ 导入失败，请查看控制台了解详情');
+        console.error('导入失败:', error);
+      }
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const openCategoryModal = (category?: ToolCategory) => {
     if (category) {
       setEditingCategory(category);
@@ -175,12 +206,22 @@ export default function ToolsManagementPage() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-foreground">工具管理</h1>
-          <button
-            onClick={() => openCategoryModal()}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <Plus className="w-4 h-4" /> 添加分类
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleImportDefaults}
+              disabled={isImporting}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-4 h-4" />
+              {isImporting ? '导入中...' : '导入内置工具'}
+            </button>
+            <button
+              onClick={() => openCategoryModal()}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="w-4 h-4" /> 添加分类
+            </button>
+          </div>
         </div>
 
         <div className="space-y-8">
