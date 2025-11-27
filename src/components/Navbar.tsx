@@ -132,23 +132,6 @@ export default function Navbar({ title, categories, logo }: NavbarProps) {
               </motion.button>
             )}
 
-            <motion.div
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 500 }}
-            >
-              <Link
-                href="/admin/login"
-                className="relative flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-primary via-purple-600 to-pink-600 rounded-xl transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Settings className="w-4 h-4 relative z-10" />
-                <span className="hidden sm:inline relative z-10">管理后台</span>
-                {/* 闪光效果 */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
-              </Link>
-            </motion.div>
-
             {/* Mobile Menu Button */}
             <motion.button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
