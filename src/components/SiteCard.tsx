@@ -257,19 +257,22 @@ export default function SiteCard({
               {description || '暂无描述'}
             </p>
             {truncateDescription && description && showDescriptionOnHover && (
-              <p
-                className="absolute top-0 left-0 w-full text-xs sm:text-sm leading-relaxed hidden group-hover:block z-50 p-2 -m-2 rounded-md shadow-xl"
+              <div
+                className="absolute top-0 left-0 right-0 text-xs sm:text-sm leading-relaxed hidden group-hover:block z-50 px-4 py-3 rounded-xl"
                 style={{
                   fontSize: descriptionFontSize ? `${descriptionFontSize}px` : undefined,
                   backgroundColor: isDark ? '#18181b' : '#ffffff',
-                  color: isDark ? '#fafafa' : '#374151',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  borderColor: isDark ? '#3f3f46' : '#e5e7eb'
+                  color: isDark ? '#e4e4e7' : '#3f3f46',
+                  border: `1px solid ${isDark ? '#3f3f46' : '#e4e4e7'}`,
+                  boxShadow: isDark
+                    ? '0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4)'
+                    : '0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08)',
+                  minWidth: '200px',
+                  maxWidth: '100%'
                 }}
               >
                 {description}
-              </p>
+              </div>
             )}
           </div>
         </div>
