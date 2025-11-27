@@ -182,7 +182,7 @@ function EnhancedToolEditorComponent({
     description: tool?.description || '',
     icon: tool?.icon || '🔧',
     code: tool?.code || '',
-    categoryId: tool?.categoryId || '',
+    categoryId: tool?.categoryId || (categories.length > 0 ? categories[0].id : 0),
     sortOrder: tool?.sortOrder || 0
   });
 
@@ -400,7 +400,7 @@ function processText() {
                 <Label htmlFor="category">分类 *</Label>
                 <Select
                   value={formData.categoryId}
-                  onValueChange={(value: any) => setFormData(prev => ({ ...prev, categoryId: value }))}
+                  onValueChange={(value: any) => setFormData(prev => ({ ...prev, categoryId: parseInt(value) }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="选择分类" />

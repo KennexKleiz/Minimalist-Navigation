@@ -10,6 +10,10 @@
   --border: #e4e4e7;     /* zinc-200 */
   --input: #e4e4e7;
   --ring: #6366f1;
+
+  /* 使用系统字体作为后备方案 */
+  --font-geist-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-geist-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
 }
 
 @theme inline {

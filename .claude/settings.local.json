@@ -12,7 +12,8 @@
       "Bash(npx prisma db push:*)",
       "Bash(npm run build)",
       "Bash(if exist:*)",
-      "Bash(npx prisma generate:*)"
+      "Bash(npx prisma generate:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
