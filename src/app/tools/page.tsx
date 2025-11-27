@@ -25,6 +25,7 @@ export default function ToolsPage() {
   const [navCategories, setNavCategories] = useState<any[]>([]);
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [config, setConfig] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchToolCategories();
@@ -38,6 +39,8 @@ export default function ToolsPage() {
       setToolCategories(res.data);
     } catch (error) {
       console.error('Failed to fetch tool categories', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -242,12 +245,19 @@ export default function ToolsPage() {
                 </motion.section>
               ))}
 
-              {toolCategories.length === 0 && (
+              {isLoading ? (
+                <div className="text-center py-20">
+                  <div className="inline-flex items-center gap-3 px-6 py-4 bg-muted/20 rounded-2xl border border-border/40">
+                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-muted-foreground">加载工具中...</p>
+                  </div>
+                </div>
+              ) : toolCategories.length === 0 ? (
                 <div className="text-center py-20 bg-muted/20 rounded-3xl border border-dashed border-border/60">
                   <p className="text-muted-foreground text-lg">暂无工具</p>
                   <p className="text-muted-foreground text-sm mt-2">请在后台添加工具</p>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         )}

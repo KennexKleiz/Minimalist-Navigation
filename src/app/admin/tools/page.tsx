@@ -108,7 +108,7 @@ export default function ToolsManagementPage() {
         return;
       }
     } else {
-      if (!confirm('确定要导入内置工具吗？\n\n将导入 4 个分类和 10+ 个实用工具。')) {
+      if (!confirm('确定要导入内置工具吗？\n\n将导入 4 个分类和 9 个实用工具。')) {
         return;
       }
     }
