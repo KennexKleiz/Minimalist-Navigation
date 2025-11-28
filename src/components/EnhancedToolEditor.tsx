@@ -310,28 +310,34 @@ function processText() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast.error('请输入工具名称');
       return;
     }
-    
+
     if (!formData.description.trim()) {
       toast.error('请输入工具描述');
       return;
     }
-    
+
     if (!formData.categoryId) {
       toast.error('请选择工具分类');
       return;
     }
-    
+
     if (!formData.code.trim()) {
       toast.error('请输入工具代码');
       return;
     }
 
-    onSave(formData);
+    // 如果是新建工具且 sortOrder 为 0，则不传递 sortOrder 让后端自动计算
+    const dataToSave = { ...formData };
+    if (!tool && formData.sortOrder === 0) {
+      delete (dataToSave as any).sortOrder;
+    }
+
+    onSave(dataToSave);
   };
 
   const insertTemplate = (template: string) => {

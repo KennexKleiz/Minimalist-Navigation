@@ -186,7 +186,7 @@ export default function ToolsManagementPage() {
     <h1>我的工具</h1>
     <!-- 在这里添加你的HTML内容 -->
   </div>
-  
+
   <script>
     // 在这里添加你的JavaScript代码
     console.log('工具已加载');
@@ -195,7 +195,7 @@ export default function ToolsManagementPage() {
 </html>`,
         icon: '🔧',
         categoryId: categoryId || categories[0]?.id || 0,
-        sortOrder: 0
+        sortOrder: undefined as any
       });
     }
     setShowToolModal(true);
