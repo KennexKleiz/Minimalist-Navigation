@@ -21,34 +21,17 @@ export function checkToolSecurity(code: string): SecurityCheckResult {
     // 危险的全局对象
     { pattern: /eval\s*\(/, type: 'error', message: '禁止使用 eval() 函数' },
     { pattern: /Function\s*\(/, type: 'error', message: '禁止使用 Function 构造函数' },
-    { pattern: /setTimeout\s*\(/, type: 'warning', message: 'setTimeout 可能被滥用，请谨慎使用' },
-    { pattern: /setInterval\s*\(/, type: 'warning', message: 'setInterval 可能被滥用，请谨慎使用' },
-    
+
     // DOM 操作
     { pattern: /document\.write\s*\(/, type: 'error', message: '禁止使用 document.write()' },
-    { pattern: /innerHTML\s*=/, type: 'warning', message: 'innerHTML 可能导致 XSS 攻击，建议使用 textContent' },
     { pattern: /outerHTML\s*=/, type: 'error', message: '禁止使用 outerHTML 赋值' },
-    
-    // 网络请求
-    { pattern: /XMLHttpRequest/, type: 'warning', message: 'XMLHttpRequest 需要谨慎使用，避免跨域问题' },
-    { pattern: /fetch\s*\(/, type: 'warning', message: 'fetch 请求需要谨慎使用，确保目标安全' },
-    
-    // 存储操作
-    { pattern: /localStorage\./, type: 'warning', message: 'localStorage 操作需要注意数据隐私' },
-    { pattern: /sessionStorage\./, type: 'warning', message: 'sessionStorage 操作需要注意数据隐私' },
-    { pattern: /indexedDB/, type: 'warning', message: 'indexedDB 操作需要注意数据隐私' },
-    
+
     // 危险的 Window 对象属性
     { pattern: /window\.location\s*=/, type: 'error', message: '禁止重定向页面' },
-    { pattern: /window\.open\s*\(/, type: 'warning', message: 'window.open 可能被用于恶意弹窗' },
-    
-    // 代码注入
-    { pattern: /script\s*src\s*=/, type: 'error', message: '禁止动态加载外部脚本' },
+
+    // 代码注入 - 只检查外部脚本，允许内联脚本
+    { pattern: /<script[^>]+src\s*=\s*["']https?:\/\/(?!cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)/i, type: 'error', message: '禁止加载不受信任的外部脚本，仅允许 cdn.jsdelivr.net 和 cdnjs.cloudflare.com' },
     { pattern: /import\s*\(/, type: 'error', message: '禁止动态导入模块' },
-    
-    // 文件系统
-    { pattern: /FileReader/, type: 'warning', message: 'FileReader 操作需要注意文件隐私' },
-    { pattern: /Blob\s*\(/, type: 'warning', message: 'Blob 操作需要谨慎使用' },
   ];
 
   // 检查危险模式
@@ -111,19 +94,8 @@ export function validateToolMetadata(name: string, description: string): {
     errors.push('工具描述不能超过 200 个字符');
   }
 
-  // 检查是否包含敏感词
-  const sensitiveWords = ['密码', 'password', 'token', 'key', 'secret'];
-  const lowerName = name.toLowerCase();
-  const lowerDesc = description.toLowerCase();
-  
-  for (const word of sensitiveWords) {
-    if (lowerName.includes(word)) {
-      errors.push(`工具名称不能包含敏感词: ${word}`);
-    }
-    if (lowerDesc.includes(word)) {
-      errors.push(`工具描述不能包含敏感词: ${word}`);
-    }
-  }
+  // 移除敏感词检查 - 允许工具处理密码、token 等功能
+  // 例如：密码生成器、密码强度检测等都是合法的工具
 
   return {
     isValid: errors.length === 0,

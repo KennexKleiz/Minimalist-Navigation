@@ -183,7 +183,8 @@ function EnhancedToolEditorComponent({
     icon: tool?.icon || '🔧',
     code: tool?.code || '',
     categoryId: tool?.categoryId || (categories.length > 0 ? categories[0].id : 0),
-    sortOrder: tool?.sortOrder || 0
+    sortOrder: tool?.sortOrder || 0,
+    skipSecurityCheck: (tool as any)?.skipSecurityCheck || false
   });
 
   const [activeTab, setActiveTab] = useState('edit');
@@ -470,6 +471,20 @@ function processText() {
                 onChange={(e: any) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))}
                 placeholder="排序数字，越小越靠前"
               />
+            </div>
+
+            <div className="flex items-center space-x-2 pt-2">
+              <input
+                type="checkbox"
+                id="skipSecurityCheck"
+                checked={formData.skipSecurityCheck}
+                onChange={(e) => setFormData(prev => ({ ...prev, skipSecurityCheck: e.target.checked }))}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <Label htmlFor="skipSecurityCheck" className="cursor-pointer">
+                <span className="font-medium">跳过安全检查</span>
+                <span className="text-xs text-gray-500 ml-2">(允许使用任何代码，包括外部脚本)</span>
+              </Label>
             </div>
           </form>
         </CardContent>

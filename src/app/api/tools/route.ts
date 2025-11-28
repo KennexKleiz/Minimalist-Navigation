@@ -24,13 +24,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: metadataValidation.errors }, { status: 400 });
     }
 
-    // 检查代码安全性
-    const securityCheck = checkToolSecurity(body.code);
-    if (!securityCheck.isSafe) {
-      return NextResponse.json({
-        error: '代码安全检查失败',
-        details: securityCheck.errors
-      }, { status: 400 });
+    // 只有在未跳过安全检查时才进行检查
+    let warnings: string[] = [];
+    if (!body.skipSecurityCheck) {
+      const securityCheck = checkToolSecurity(body.code);
+      if (!securityCheck.isSafe) {
+        return NextResponse.json({
+          error: '代码安全检查失败',
+          details: securityCheck.errors
+        }, { status: 400 });
+      }
+      warnings = securityCheck.warnings;
     }
 
     // 如果未提供 sortOrder，自动计算下一个序号
@@ -50,13 +54,14 @@ export async function POST(request: Request) {
         code: body.code,
         icon: body.icon,
         categoryId: body.categoryId,
-        sortOrder: finalSortOrder
+        sortOrder: finalSortOrder,
+        skipSecurityCheck: body.skipSecurityCheck || false
       }
     });
 
     return NextResponse.json({
       tool,
-      warnings: securityCheck.warnings.length > 0 ? securityCheck.warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create tool' }, { status: 500 });
@@ -74,7 +79,8 @@ export async function PUT(request: Request) {
         code: body.code,
         icon: body.icon,
         categoryId: body.categoryId,
-        sortOrder: body.sortOrder
+        sortOrder: body.sortOrder,
+        skipSecurityCheck: body.skipSecurityCheck !== undefined ? body.skipSecurityCheck : undefined
       }
     });
     return NextResponse.json(tool);

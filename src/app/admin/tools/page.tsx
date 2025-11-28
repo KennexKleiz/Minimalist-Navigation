@@ -355,8 +355,23 @@ export default function ToolsManagementPage() {
                   fetchCategories();
                   setShowToolModal(false);
                   setEditingTool(undefined);
-                } catch (error) {
-                  alert('操作失败');
+                } catch (error: any) {
+                  // 显示详细的错误信息
+                  if (error.response?.data?.error) {
+                    const errorMsg = error.response.data.error;
+                    const details = error.response.data.details;
+
+                    if (details && Array.isArray(details)) {
+                      alert(`❌ ${errorMsg}\n\n详细信息：\n${details.join('\n')}`);
+                    } else if (Array.isArray(errorMsg)) {
+                      alert(`❌ 操作失败\n\n${errorMsg.join('\n')}`);
+                    } else {
+                      alert(`❌ ${errorMsg}`);
+                    }
+                  } else {
+                    alert('❌ 操作失败，请检查输入内容');
+                  }
+                  console.error('保存工具失败:', error.response?.data);
                 }
               }}
               onCancel={() => {
