@@ -190,11 +190,28 @@ function EnhancedToolEditorComponent({
   const [activeTab, setActiveTab] = useState('edit');
   const editorRef = useRef<any>(null);
 
-  // 常用图标列表
-  const commonIcons = [
-    '🔧', '📝', '🔤', '⚖️', '🔠', '🔗', '⏰', '😊', '🔐', '🎨',
-    '💻', '🌐', '📊', '🔍', '📈', '🎯', '💡', '🚀', '⚡', '🛠️'
-  ];
+  // 图标分类列表
+  const iconCategories = {
+    常用: ['🔧', '📝', '🔤', '⚖️', '🔠', '🔗', '⏰', '😊', '🔐', '🎨', '💻', '🌐', '📊', '🔍', '📈', '🎯', '💡', '🚀', '⚡', '🛠️'],
+    电子设备: ['⌚', '📱', '📲', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️', '🗜️', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥', '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️', '🎛️', '🧭', '⏱️', '⏲️', '⏰', '🕰️', '⌛', '⏳', '📡', '🔋', '🪫', '🔌', '💡', '🔦', '🕯️', '🪔', '🧯', '🛢️'],
+    金融: ['💸', '💵', '💴', '💶', '💷', '🪙', '💰', '💳', '🪪', '💎', '⚖️'],
+    工具: ['🪜', '🧰', '🪛', '🔧', '🔨', '⚒️', '🛠️', '⛏️', '🪏', '🪚', '🔩', '⚙️', '🪤', '🧱', '⛓️', '🧲', '🔫', '💣', '🧨', '🪓', '🔪', '🗡️', '⚔️', '🛡️'],
+    医疗: ['🚬', '⚰️', '🪦', '⚱️', '🏺', '🔮', '📿', '🧿', '🪬', '💈', '⚗️', '🔭', '🔬', '🕳️', '🩻', '🩹', '🩺', '💊', '💉', '🩸', '🧬', '🦠', '🧫', '🧪', '🌡️'],
+    家居: ['🧹', '🪠', '🧺', '🧻', '🚽', '🚰', '🚿', '🛁', '🛀', '🧼', '🪥', '🪒', '🪮', '🧽', '🪣', '🧴', '🛎️', '🔑', '🗝️', '🚪', '🪑', '🛋️', '🛏️', '🛌', '🧸', '🪆', '🖼️', '🪞', '🪟'],
+    购物: ['🛍️', '🛒', '🎁', '🎈', '🎏', '🎀', '🪄', '🪅', '🎊', '🎉', '🎎', '🪭', '🏮', '🎐', '🪩', '🧧'],
+    文档: ['✉️', '📩', '📨', '📧', '💌', '📥', '📤', '📦', '🏷️', '🪧', '📪', '📫', '📬', '📭', '📮', '📯', '📜', '📃', '📄', '📑', '🧾', '📊', '📈', '📉', '🗒️', '🗓️', '📆', '📅', '🗑️', '📇', '🗃️', '🗳️', '🗄️', '📋', '📁', '📂', '🗂️', '🗞️', '📰', '📓', '📔', '📒', '📕', '📗', '📘', '📙', '📚', '📖', '🔖'],
+    文具: ['🧷', '🔗', '📎', '🖇️', '📐', '📏', '🧮', '📌', '📍', '✂️', '🖊️', '🖋️', '✒️', '🖌️', '🖍️', '📝', '✏️', '🔍', '🔎'],
+    安全: ['🔏', '🔐', '🔒', '🔓'],
+    符号: ['✔️', '☑️', '🔘', '⚪', '⚫', '🔴', '🔵', '🟤', '🟣', '🟢', '🟡', '🟠', '🔺', '🔻', '🔸', '🔹', '🔶', '🔷', '🔳', '🔲', '▪️', '▫️', '◾', '◽', '◼️', '◻️', '⬛', '⬜', '🟧', '🟦', '🟥', '🟫', '🟪', '🟩', '🟨'],
+    音频: ['🔈', '🔇', '🔉', '🔊', '🔔', '🔕', '📣', '📢'],
+    对话: ['🗨️', '👁️‍🗨️', '💬', '💭', '🗯️'],
+    娱乐: ['♠️', '♣️', '♥️', '♦️', '🃏', '🎴', '🀄'],
+    时钟: ['🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚', '🕛', '🕜', '🕝', '🕞', '🕟', '🕠', '🕡', '🕢', '🕣', '🕤', '🕥', '🕦', '🕧'],
+    其他: ['♀️', '♂️', '⚧', '⚕️']
+  };
+
+  const [showAllIcons, setShowAllIcons] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('常用');
 
   // HTML模板
   const htmlTemplates = [
@@ -435,30 +452,89 @@ function processText() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label>图标</Label>
-              <div className="flex flex-wrap gap-2">
-                {commonIcons.map((icon) => (
+
+              {/* 分类选择器 */}
+              <div className="flex gap-2 flex-wrap mb-3">
+                {Object.keys(iconCategories).map((category) => (
                   <button
-                    key={icon}
+                    key={category}
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, icon }))}
-                    className={`p-2 text-2xl rounded border transition-colors ${
-                      formData.icon === icon
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                      selectedCategory === category
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    {icon}
+                    {category} ({iconCategories[category as keyof typeof iconCategories].length})
                   </button>
                 ))}
+              </div>
+
+              {/* 图标网格 */}
+              <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {(showAllIcons
+                    ? iconCategories[selectedCategory as keyof typeof iconCategories]
+                    : iconCategories[selectedCategory as keyof typeof iconCategories].slice(0, 20)
+                  ).map((icon) => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, icon }))}
+                      className={`p-2 text-2xl rounded border transition-all ${
+                        formData.icon === icon
+                          ? 'border-blue-500 bg-blue-100 shadow-md scale-110'
+                          : 'border-gray-300 hover:border-blue-400 hover:bg-white hover:shadow-sm'
+                      }`}
+                      title={icon}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 展开/收起按钮 */}
+                {iconCategories[selectedCategory as keyof typeof iconCategories].length > 20 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllIcons(!showAllIcons)}
+                    className="w-full py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors flex items-center justify-center gap-1"
+                  >
+                    {showAllIcons ? (
+                      <>
+                        <span>收起</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                        </svg>
+                      </>
+                    ) : (
+                      <>
+                        <span>查看更多 ({iconCategories[selectedCategory as keyof typeof iconCategories].length - 20} 个)</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* 自定义图标输入 */}
+              <div className="flex items-center gap-2">
+                <Label className="text-sm text-gray-600">或输入自定义图标：</Label>
                 <Input
                   type="text"
                   value={formData.icon}
                   onChange={(e: any) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
-                  placeholder="或输入自定义图标"
-                  className="w-20 h-10 text-center"
+                  placeholder="输入 emoji 或文字"
+                  className="w-32 h-10 text-center text-xl"
                 />
+                {formData.icon && (
+                  <span className="text-3xl">{formData.icon}</span>
+                )}
               </div>
             </div>
 
