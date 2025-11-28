@@ -35,7 +35,13 @@
       "Bash(taskkill:*)",
       "Bash(find:*)",
       "Bash(echo.:*)",
-      "Bash(iconv:*)"
+      "Bash(iconv:*)",
+      "Bash(node scripts/init-admin.js:*)",
+      "Bash(node scripts/seed-sample-data.js:*)",
+      "Bash(echo:*)",
+      "Bash(DATABASE_URL=\"mysql://tools_onlinewete:tools_onlinewete@localhost:3306/tools_onlinewete\" npx prisma db push:*)",
+      "Bash(node scripts/init-subscriptions.js:*)",
+      "Bash(DATABASE_URL=\"mysql://tools_onlinewete:tools_onlinewete@localhost:3306/tools_onlinewete\" node:*)"
     ],
     "deny": [],
     "ask": []

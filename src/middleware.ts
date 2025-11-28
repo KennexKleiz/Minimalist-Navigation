@@ -20,6 +20,7 @@ export function middleware(request: NextRequest) {
       '/api/categories',
       '/api/config',
       '/api/ai/recommend',
+      '/api/ai/chat',
       '/api/sections/verify',
       '/api/sites/interact',
       '/api/sites/rankings',
