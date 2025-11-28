@@ -1,101 +1,104 @@
-# 极简智能导航 (Smart Nav)
+# 极简智能导航 - Minimalist Smart Navigation
 
-一个基于 Next.js 14 构建的现代化、高性能、可高度定制的网址导航系统。集成了 AI 智能助手、密码保护、个性化主题等特色功能。
+<div align="center">
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-16.0.3-black.svg)
+![React](https://img.shields.io/badge/React-19.2.0-61dafb.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178c6.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+**一个现代化的网址导航系统，集成在线工具箱和 AI 智能助手**
+
+[在线演示](https://8y.cx) | [安装文档](./INSTALL.md) | [部署指南](./DEPLOY.md)
+
+</div>
+
+---
 
 ## ✨ 核心特性
 
-### 🚀 极致体验
-- **现代化 UI 设计**：采用 Zinc + Indigo 配色，结合毛玻璃 (Glassmorphism) 特效，视觉体验清爽大气。
-- **完美深色模式**：全站支持明亮/暗黑模式无缝切换，图标背景智能适配。
-- **流畅动画**：基于 Framer Motion 的页面转场和交互动画。
-- **响应式布局**：完美适配桌面端、平板和移动端设备。
+### 🎯 网址导航系统
 
-### 🛡️ 隐私与安全
-- **板块密码保护**：支持对特定板块设置访问密码，保护私有链接或敏感内容。
-- **安全后台管理**：基于 JWT 的管理员身份验证。
+- **分类管理** - 多级分类结构，支持无限层级
+- **板块组织** - 每个分类下可创建多个板块
+- **网站卡片** - 精美的网站卡片展示，支持图标、描述、标签
+- **密码保护** - 板块级别的密码保护功能
+- **标签系统** - 灵活的标签分类和筛选
+- **拖拽排序** - 直观的拖拽排序功能
+- **搜索功能** - 快速搜索网站和工具
+- **响应式设计** - 完美适配桌面端和移动端
 
-### 🤖 AI 智能赋能
-- **AI 助手集成**：内置 Gemini AI 驱动的智能助手(开发中)。
-- **智能推荐**：支持自然语言对话，智能推荐相关网站。
-- **Magic Fill**：(开发中) AI 自动填充站点信息。
+### 🛠️ 在线工具箱
 
-### 📊 数据与互动
-- **多维排行榜**：首页展示“站长推荐”、“热门浏览”、“最新收录”、“随机探索”四大榜单。
-- **用户互动**：支持站点点赞和浏览量统计，实时反馈热门程度。
-- **全局搜索**：支持对分类、板块、站点标题及描述的实时搜索。
+- **工具分类** - 支持多个工具分类
+- **Monaco 编辑器** - 专业的代码编辑器，支持 HTML/CSS/JavaScript
+- **实时预览** - 工具代码实时预览
+- **模板库** - 内置常用工具模板
+- **代码管理** - 支持复制、下载、上传工具代码
+- **安全检查** - 可选的代码安全验证
+- **图标选择器** - 16 个分类，300+ emoji 图标
+- **工具排行榜** - 基于浏览量和点赞数的排行榜
+- **内置工具** - 9 个实用工具开箱即用
 
-### 🎨 高度个性化
-- **背景自定义**：支持上传多张背景图片，可设置“固定”或“随机”展示模式。
-- **布局配置**：后台可配置卡片网格列数、描述截断行数等。
-- **站点图标**：支持自动获取 Favicon，也支持自定义上传或 SVG 代码。
+### 🤖 AI 智能助手
 
-## 🛠️ 技术栈
+- **多提供商支持** - OpenAI、Google Gemini、Anthropic Claude、智谱 AI
+- **模型管理** - 支持多个 AI 模型配置和切换
+- **全局默认模型** - 设置默认 AI 模型
+- **连接测试** - 一键测试 AI 模型连接
+- **前端调用** - 无需认证，前端直接调用 AI 接口
+- **使用指南** - 详细的 API 调用文档和示例
 
-- **框架**: [Next.js 14](https://nextjs.org/) (App Router)
-- **样式**: [Tailwind CSS](https://tailwindcss.com/)
-- **数据库**: [SQLite](https://www.sqlite.org/) (via [Prisma ORM](https://www.prisma.io/))
-- **动画**: [Framer Motion](https://www.framer.com/motion/)
-- **图标**: [Lucide React](https://lucide.dev/)
-- **AI**: Google Gemini API
+## 🚀 快速开始
 
-## 📦 快速开始
+### 安装
 
-### 1. 环境准备
-确保你的环境已安装 Node.js 18+。
+\`\`\`bash
+# 克隆项目
+git clone https://github.com/yourusername/minimalist-navigation.git
+cd minimalist-navigation
 
-### 2. 安装依赖
-```bash
+# 安装依赖
 npm install
-# 或
-pnpm install
-```
 
-## 3. 配置环境变量
+# 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，设置 ENCRYPTION_KEY
 
-1.  在项目根目录下找到 `.env` 文件（如果没有，请创建一个）。
-2.  参考以下内容配置您的环境变量：
+# 初始化数据库
+npx prisma db push
 
-```env
-# 数据库连接字符串 (默认使用 SQLite 文件数据库)
-DATABASE_URL="file:./dev.db"
-
-# Google Gemini API Key (用于 AI 智能助手和自动填充功能)
-# 获取地址: https://makersuite.google.com/app/apikey
-GEMINI_API_KEY="your_gemini_api_key_here"
-
-# (可选) 如果您部署在生产环境，建议设置一个随机的密钥用于加密 Cookie 等
-# NEXTAUTH_SECRET="your_random_secret_string"
-```
-
-### 4. 数据库初始化
-```bash
-npx prisma migrate dev --name init
-npx prisma db seed # 导入初始数据
-```
-
-### 5. 启动开发服务器
-```bash
+# 启动开发服务器
 npm run dev
-```
-访问 http://localhost:3000 即可看到效果。
+\`\`\`
 
-### 6. 后台管理
-访问 http://localhost:3000/admin 进入后台管理系统。
-默认账户：admin   默认密码：123456
-- 默认账户：(请在数据库 seed 中查看或自行注册)
+访问 \`http://localhost:3000\`
 
-## 📝 部署
+### 首次使用
 
-本项目推荐部署在 [Vercel](https://vercel.com) 或任何支持 Node.js 的服务器上。
+1. 访问 \`http://localhost:3000/admin/login\`
+2. 默认账号：\`admin\` / \`admin123\`
+3. **立即修改密码**：管理后台 → 修改密码
+4. 配置 AI 提供商（可选）
+5. 导入内置工具或创建自己的工具
+6. 开始添加网站和分类
 
-```bash
-npm run build
-npm start
-```
+## 📚 详细文档
 
-### ⚠️ 重要注意事项
-- **数据库更新**：每次更新代码后，如果涉及数据库字段变更（如新增功能），请务必在服务器上运行 `npx prisma db push` 或 `npx prisma migrate deploy` 来更新数据库结构，否则可能会导致保存失败等错误。
+- [安装文档](./INSTALL.md) - 详细的安装步骤和环境配置
+- [部署指南](./DEPLOY.md) - 生产环境部署指南
 
 ## 📄 许可证
 
-MIT License
+本项目采用 MIT 许可证
+
+---
+
+<div align="center">
+
+**如果这个项目对你有帮助，请给一个 ⭐️ Star！**
+
+Made with ❤️
+
+</div>

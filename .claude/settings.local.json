@@ -33,7 +33,9 @@
       "Bash(npx tsc:*)",
       "Bash(tasklist:*)",
       "Bash(taskkill:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(echo.:*)",
+      "Bash(iconv:*)"
     ],
     "deny": [],
     "ask": []
