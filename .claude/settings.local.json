@@ -16,7 +16,13 @@
       "Bash(cat:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(mkdir:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"download-ai-models.ps1\")",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(npm pack:*)",
+      "Bash(tar:*)"
     ],
     "deny": [],
     "ask": []

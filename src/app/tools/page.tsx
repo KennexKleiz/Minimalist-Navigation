@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import axios from 'axios';
 
@@ -23,7 +24,6 @@ interface ToolCategory {
 export default function ToolsPage() {
   const [toolCategories, setToolCategories] = useState<ToolCategory[]>([]);
   const [navCategories, setNavCategories] = useState<any[]>([]);
-  const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [config, setConfig] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -118,43 +118,7 @@ export default function ToolsPage() {
       </header>
 
       <main className="container mx-auto px-4 pb-20" style={{ maxWidth: config?.containerMaxWidth || '1440px' }}>
-        {selectedTool ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <button
-              onClick={() => setSelectedTool(null)}
-              className="mb-6 px-4 py-2 bg-muted/50 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-lg transition-all flex items-center gap-2"
-            >
-              ← 返回工具列表
-            </button>
-
-            <div className="bg-card rounded-2xl border border-border p-6 shadow-lg">
-              <div className="flex items-center gap-4 mb-6 border-b border-border/50 pb-6">
-                {selectedTool.icon && (
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl shrink-0">
-                    {selectedTool.icon}
-                  </div>
-                )}
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground">{selectedTool.name}</h2>
-                  {selectedTool.description && (
-                    <p className="text-muted-foreground mt-1">{selectedTool.description}</p>
-                  )}
-                </div>
-              </div>
-
-              <iframe
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
-                className="w-full h-[800px] border-0 rounded-xl bg-white dark:bg-[#18181b]"
-                srcDoc={selectedTool.code}
-                title={selectedTool.name}
-              />
-            </div>
-          </motion.div>
-        ) : (
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* Left Sidebar Navigation (Desktop) */}
             {toolCategories.length > 0 && (
               <aside className="hidden lg:block w-36 sticky top-24 shrink-0">
@@ -213,12 +177,15 @@ export default function ToolsPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {category.tools.map((tool) => (
-                      <motion.div
+                      <Link
                         key={tool.id}
-                        whileHover={{ y: -5 }}
-                        className="group relative flex flex-col h-full rounded-2xl border border-border/50 bg-card p-5 transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 cursor-pointer"
-                        onClick={() => setSelectedTool(tool)}
+                        href={`/tools/${tool.id}`}
+                        className="block"
                       >
+                        <motion.div
+                          whileHover={{ y: -5 }}
+                          className="group relative flex flex-col h-full rounded-2xl border border-border/50 bg-card p-5 transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 cursor-pointer"
+                        >
                         {/* 背景装饰 */}
                         <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
                           <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-all duration-500 group-hover:bg-primary/10" />
@@ -240,6 +207,7 @@ export default function ToolsPage() {
                           </div>
                         </div>
                       </motion.div>
+                    </Link>
                     ))}
                   </div>
                 </motion.section>
@@ -260,7 +228,6 @@ export default function ToolsPage() {
               ) : null}
             </div>
           </div>
-        )}
       </main>
     </div>
   );
