@@ -15,7 +15,8 @@
       "Bash(npx prisma generate:*)",
       "Bash(cat:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(sqlite3:*)"
     ],
     "deny": [],
     "ask": []

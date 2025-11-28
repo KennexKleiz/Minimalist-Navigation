@@ -88,8 +88,8 @@ export default function Navbar({ title, categories, logo, showTools = false }: N
           </motion.div>
 
           {/* Desktop Navigation - 胶囊式设计 */}
-          <div className="hidden md:flex items-center gap-2 bg-muted/50 backdrop-blur-sm rounded-full px-2 py-1.5 border border-border/50 shadow-inner">
-            <Link href="/" className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full">
+          <div className="hidden lg:flex items-center gap-2 bg-muted/50 backdrop-blur-sm rounded-full px-2 py-1.5 border border-border/50 shadow-inner">
+            <Link href="/" className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full whitespace-nowrap">
               <span className={pathname === '/' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}>
                 首页
               </span>
@@ -101,7 +101,7 @@ export default function Navbar({ title, categories, logo, showTools = false }: N
               <Link
                 key={cat.id}
                 href={`/category/${cat.id}`}
-                className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full"
+                className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full whitespace-nowrap"
               >
                 <span className={pathname === `/category/${cat.id}` ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}>
                   {cat.name}
@@ -112,7 +112,7 @@ export default function Navbar({ title, categories, logo, showTools = false }: N
               </Link>
             ))}
             {showTools && (
-              <Link href="/tools" className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full">
+              <Link href="/tools" className="relative px-4 py-2 text-sm font-semibold transition-all group rounded-full whitespace-nowrap">
                 <span className={pathname === '/tools' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}>
                   在线工具
                 </span>
@@ -146,7 +146,7 @@ export default function Navbar({ title, categories, logo, showTools = false }: N
             {/* Mobile Menu Button */}
             <motion.button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
+              className="lg:hidden p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
               whileTap={{ scale: 0.85, rotate: 90 }}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -162,7 +162,7 @@ export default function Navbar({ title, categories, logo, showTools = false }: N
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background border-b border-border overflow-hidden"
+            className="lg:hidden bg-background border-b border-border overflow-hidden"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-2">
               <Link
@@ -190,6 +190,19 @@ export default function Navbar({ title, categories, logo, showTools = false }: N
                   {cat.name}
                 </Link>
               ))}
+              {showTools && (
+                <Link
+                  href="/tools"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`p-3 rounded-lg text-sm font-medium transition-colors ${
+                    pathname === '/tools'
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                >
+                  在线工具
+                </Link>
+              )}
             </div>
           </motion.div>
         )}
