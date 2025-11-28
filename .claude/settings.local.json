@@ -28,7 +28,9 @@
       "Bash(node -e:*)",
       "Bash(node test-api-response.js:*)",
       "Bash(powershell -Command:*)",
-      "Bash(node test-config.js:*)"
+      "Bash(node test-config.js:*)",
+      "Bash(node test-tool-sort.js:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

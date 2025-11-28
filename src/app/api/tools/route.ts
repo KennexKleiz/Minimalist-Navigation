@@ -17,22 +17,32 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     // 验证工具元数据
     const metadataValidation = validateToolMetadata(body.name, body.description);
     if (!metadataValidation.isValid) {
       return NextResponse.json({ error: metadataValidation.errors }, { status: 400 });
     }
-    
+
     // 检查代码安全性
     const securityCheck = checkToolSecurity(body.code);
     if (!securityCheck.isSafe) {
-      return NextResponse.json({ 
-        error: '代码安全检查失败', 
-        details: securityCheck.errors 
+      return NextResponse.json({
+        error: '代码安全检查失败',
+        details: securityCheck.errors
       }, { status: 400 });
     }
-    
+
+    // 如果未提供 sortOrder，自动计算下一个序号
+    let finalSortOrder = body.sortOrder;
+    if (finalSortOrder === undefined || finalSortOrder === null) {
+      const lastTool = await prisma.tool.findFirst({
+        where: { categoryId: body.categoryId },
+        orderBy: { sortOrder: 'desc' },
+      });
+      finalSortOrder = (lastTool?.sortOrder || 0) + 1;
+    }
+
     const tool = await prisma.tool.create({
       data: {
         name: body.name,
@@ -40,13 +50,13 @@ export async function POST(request: Request) {
         code: body.code,
         icon: body.icon,
         categoryId: body.categoryId,
-        sortOrder: body.sortOrder || 0
+        sortOrder: finalSortOrder
       }
     });
-    
-    return NextResponse.json({ 
-      tool, 
-      warnings: securityCheck.warnings.length > 0 ? securityCheck.warnings : undefined 
+
+    return NextResponse.json({
+      tool,
+      warnings: securityCheck.warnings.length > 0 ? securityCheck.warnings : undefined
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create tool' }, { status: 500 });
