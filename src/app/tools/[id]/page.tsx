@@ -89,7 +89,15 @@ export default function ToolDetailPage() {
       setIsLiked(true);
       localStorage.setItem(`tool_liked_${tool.id}`, 'true');
       await axios.post('/api/tools/interact', { id: tool.id, type: 'like' });
-    } catch (error) {
+    } catch (error: any) {
+      // 如果是 429 错误（已经点赞过），保持点赞状态
+      if (error.response?.status === 429) {
+        console.log('Already liked this tool');
+        // 保持点赞状态，不回滚
+        return;
+      }
+
+      // 其他错误才回滚
       console.error('Failed to like', error);
       setIsLiked(false);
       setLikes(prev => prev - 1);
