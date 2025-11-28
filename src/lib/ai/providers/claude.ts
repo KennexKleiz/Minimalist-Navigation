@@ -59,34 +59,60 @@ export class ClaudeProvider extends BaseAIProvider {
   }
 
   async listModels(): Promise<AIModelInfo[]> {
-    // Claude API 不提供模型列表接口，返回已知模型
-    return [
-      {
-        id: 'claude-3-5-sonnet-20241022',
-        name: 'Claude 3.5 Sonnet',
-        description: 'Most intelligent model',
-      },
-      {
-        id: 'claude-3-5-haiku-20241022',
-        name: 'Claude 3.5 Haiku',
-        description: 'Fastest model',
-      },
-      {
-        id: 'claude-3-opus-20240229',
-        name: 'Claude 3 Opus',
-        description: 'Powerful model for highly complex tasks',
-      },
-      {
-        id: 'claude-3-sonnet-20240229',
-        name: 'Claude 3 Sonnet',
-        description: 'Balance of intelligence and speed',
-      },
-      {
-        id: 'claude-3-haiku-20240307',
-        name: 'Claude 3 Haiku',
-        description: 'Fast and compact model',
-      },
-    ];
+    try {
+      // 使用 Anthropic REST API 获取模型列表
+      const baseUrl = this.baseUrl || 'https://api.anthropic.com';
+      const response = await fetch(`${baseUrl}/v1/models`, {
+        method: 'GET',
+        headers: {
+          'x-api-key': this.apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // 返回模型列表
+      return data.data.map((model: any) => ({
+        id: model.id,
+        name: model.display_name || model.id,
+        description: model.description || `Anthropic ${model.display_name || model.id}`,
+      }));
+    } catch (error: any) {
+      // 如果 API 调用失败，返回预设的模型列表作为后备
+      console.warn('Failed to fetch Claude models from API, using fallback list:', error.message);
+      return [
+        {
+          id: 'claude-3-5-sonnet-20241022',
+          name: 'Claude 3.5 Sonnet',
+          description: 'Most intelligent model',
+        },
+        {
+          id: 'claude-3-5-haiku-20241022',
+          name: 'Claude 3.5 Haiku',
+          description: 'Fastest model',
+        },
+        {
+          id: 'claude-3-opus-20240229',
+          name: 'Claude 3 Opus',
+          description: 'Powerful model for highly complex tasks',
+        },
+        {
+          id: 'claude-3-sonnet-20240229',
+          name: 'Claude 3 Sonnet',
+          description: 'Balance of intelligence and speed',
+        },
+        {
+          id: 'claude-3-haiku-20240307',
+          name: 'Claude 3 Haiku',
+          description: 'Fast and compact model',
+        },
+      ];
+    }
   }
 
   async testConnection(): Promise<boolean> {

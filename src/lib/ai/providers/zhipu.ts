@@ -67,24 +67,67 @@ export class ZhipuProvider extends BaseAIProvider {
   }
 
   async listModels(): Promise<AIModelInfo[]> {
-    // 智谱 AI 的已知模型列表
-    return [
-      {
-        id: 'glm-4',
-        name: 'GLM-4',
-        description: '智谱 AI 最新一代基座大模型',
-      },
-      {
-        id: 'glm-4v',
-        name: 'GLM-4V',
-        description: '智谱 AI 多模态大模型',
-      },
-      {
-        id: 'glm-3-turbo',
-        name: 'GLM-3-Turbo',
-        description: '智谱 AI 快速响应模型',
-      },
-    ];
+    try {
+      // 使用智谱 AI REST API 获取模型列表
+      const response = await fetch(`${this.baseUrl}/models`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // 返回模型列表
+      if (data.data && Array.isArray(data.data)) {
+        return data.data.map((model: any) => ({
+          id: model.id,
+          name: model.name || model.id,
+          description: model.description || `智谱 AI ${model.name || model.id}`,
+        }));
+      }
+
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      // 如果 API 调用失败，返回预设的模型列表作为后备
+      console.warn('Failed to fetch Zhipu models from API, using fallback list:', error.message);
+      return [
+        {
+          id: 'glm-4',
+          name: 'GLM-4',
+          description: '智谱 AI 最新一代基座大模型',
+        },
+        {
+          id: 'glm-4v',
+          name: 'GLM-4V',
+          description: '智谱 AI 多模态大模型',
+        },
+        {
+          id: 'glm-3-turbo',
+          name: 'GLM-3-Turbo',
+          description: '智谱 AI 快速响应模型',
+        },
+        {
+          id: 'glm-4-plus',
+          name: 'GLM-4-Plus',
+          description: '智谱 AI 增强版模型',
+        },
+        {
+          id: 'glm-4-air',
+          name: 'GLM-4-Air',
+          description: '智谱 AI 轻量级模型',
+        },
+        {
+          id: 'glm-4-flash',
+          name: 'GLM-4-Flash',
+          description: '智谱 AI 快速响应模型',
+        },
+      ];
+    }
   }
 
   async testConnection(): Promise<boolean> {

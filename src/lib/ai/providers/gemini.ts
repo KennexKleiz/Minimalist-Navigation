@@ -60,21 +60,37 @@ export class GeminiProvider extends BaseAIProvider {
 
   async listModels(): Promise<AIModelInfo[]> {
     try {
-      const models = await this.client.listModels();
-      return models
-        .filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
-        .map((model) => ({
+      // 使用 Google Gemini REST API 获取模型列表
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // 过滤出支持 generateContent 的模型
+      return data.models
+        .filter((model: any) =>
+          model.supportedGenerationMethods?.includes('generateContent')
+        )
+        .map((model: any) => ({
           id: model.name.replace('models/', ''),
-          name: model.displayName || model.name,
-          description: model.description || `Google ${model.displayName}`,
+          name: model.displayName || model.name.replace('models/', ''),
+          description: model.description || `Google ${model.displayName || model.name}`,
         }));
     } catch (error: any) {
-      // 如果 API 不支持列出模型，返回默认列表
+      // 如果 API 调用失败，返回预设的模型列表作为后备
+      console.warn('Failed to fetch Gemini models from API, using fallback list:', error.message);
       return [
         { id: 'gemini-pro', name: 'Gemini Pro', description: 'Google Gemini Pro' },
         { id: 'gemini-pro-vision', name: 'Gemini Pro Vision', description: 'Google Gemini Pro Vision' },
         { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', description: 'Google Gemini 1.5 Pro' },
         { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', description: 'Google Gemini 1.5 Flash' },
+        { id: 'gemini-1.5-pro-latest', name: 'Gemini 1.5 Pro Latest', description: 'Google Gemini 1.5 Pro (Latest)' },
+        { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash Latest', description: 'Google Gemini 1.5 Flash (Latest)' },
       ];
     }
   }
