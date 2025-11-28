@@ -39,6 +39,7 @@ model SiteConfig {
   showDescriptionOnHover  Boolean  @default(true)
   showTools           Boolean  @default(false)
   showToolRankings    Boolean  @default(true)
+  defaultAIModelId    Int?     // 全局默认 AI 模型 ID
   updatedAt           DateTime @updatedAt
 }
 
@@ -135,4 +136,33 @@ model ToolLike {
   tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
 
   @@unique([toolId, ip])
+}
+
+model AIProvider {
+  id          Int       @id @default(autoincrement())
+  name        String    // "OpenAI", "Gemini", "Claude", "智谱AI", "Custom"
+  type        String    // "openai", "gemini", "claude", "zhipu", "openai-compatible"
+  apiKey      String    // 加密存储
+  baseUrl     String?   // 自定义端点（用于兼容 OpenAI 格式的中转）
+  enabled     Boolean   @default(true)
+  isDefault   Boolean   @default(false) // 是否为默认使用的提供商
+  config      String?   // JSON string for extra config
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  models      AIModel[]
+}
+
+model AIModel {
+  id           Int        @id @default(autoincrement())
+  providerId   Int
+  provider     AIProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  modelId      String     // "gpt-4", "gemini-pro", "claude-3-opus" 等
+  displayName  String     // 显示名称
+  enabled      Boolean    @default(true)
+  isDefault    Boolean    @default(false) // 是否为默认模型
+  capabilities String?    // JSON string for capabilities
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([providerId, modelId])
 }

@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { Plus, Trash2, Save, Sparkles, LogOut, Settings, Layout, Globe, Edit, ExternalLink, FileText, Tag as TagIcon, Database, Upload, Download, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Save, Sparkles, LogOut, Settings, Layout, Globe, Edit, ExternalLink, FileText, Tag as TagIcon, Database, Upload, Download, RefreshCw, Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ToastContainer, ToastProps } from '@/components/Toast';
+import AIConfigPanel from '@/components/admin/AIConfigPanel';
 
 // Types (Simplified for brevity, ideally shared)
 interface Tag {
@@ -67,7 +68,7 @@ export default function Dashboard() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password' | 'tags' | 'tools' | 'backup'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'settings' | 'password' | 'tags' | 'tools' | 'backup' | 'ai-config'>('content');
   const [webdavBackups, setWebdavBackups] = useState<any[]>([]);
   const [webdavLoading, setWebdavLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -535,6 +536,14 @@ export default function Dashboard() {
             }`}
           >
             <Settings className="w-4 h-4" /> 工具管理
+          </button>
+          <button
+            onClick={() => setActiveTab('ai-config')}
+            className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'ai-config' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+            }`}
+          >
+            <Brain className="w-4 h-4" /> AI 配置
           </button>
           <button
             onClick={() => setActiveTab('settings')}
@@ -1081,6 +1090,10 @@ export default function Dashboard() {
             className="w-full h-[calc(100vh-120px)] border-0 rounded-xl bg-background"
             title="工具管理"
           />
+        ) : activeTab === 'ai-config' ? (
+          <div className="max-w-6xl">
+            <AIConfigPanel showToast={showToast} />
+          </div>
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">

@@ -30,7 +30,10 @@
       "Bash(powershell -Command:*)",
       "Bash(node test-config.js:*)",
       "Bash(node test-tool-sort.js:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
