@@ -596,6 +596,7 @@ function GlobalDefaultModelSelector({
 }) {
   const [defaultModelId, setDefaultModelId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [testing, setTesting] = useState(false);
 
   // 获取所有可用模型
   const allModels = providers.flatMap(provider =>
@@ -648,6 +649,55 @@ function GlobalDefaultModelSelector({
     }
   };
 
+  // 测试默认模型连接
+  const handleTestDefaultModel = async () => {
+    if (!defaultModelId) {
+      showToast('请先选择默认模型', 'warning');
+      return;
+    }
+
+    setTesting(true);
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: '请回复"连接成功"，这是一个测试消息。'
+            }
+          ],
+          temperature: 0.1,
+          maxTokens: 50
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.content) {
+        const currentModel = allModels.find(m => m.id === defaultModelId);
+        showToast(
+          `✅ 模型测试成功！\n模型：${currentModel?.providerName} - ${currentModel?.displayName}\n响应：${data.content.substring(0, 50)}${data.content.length > 50 ? '...' : ''}`,
+          'success'
+        );
+      } else {
+        throw new Error('响应格式异常');
+      }
+    } catch (error: any) {
+      console.error('模型测试失败:', error);
+      showToast(`❌ 模型测试失败：${error.message}`, 'error');
+    } finally {
+      setTesting(false);
+    }
+  };
+
   if (loading) {
     return null;
   }
@@ -683,13 +733,33 @@ function GlobalDefaultModelSelector({
         )}
 
         {defaultModelId && (
-          <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              ✓ 当前默认模型：
-              {allModels.find(m => m.id === defaultModelId)?.providerName} -
-              {allModels.find(m => m.id === defaultModelId)?.displayName}
-            </p>
-          </div>
+          <>
+            <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                ✓ 当前默认模型：
+                {allModels.find(m => m.id === defaultModelId)?.providerName} -
+                {allModels.find(m => m.id === defaultModelId)?.displayName}
+              </p>
+            </div>
+
+            <button
+              onClick={handleTestDefaultModel}
+              disabled={testing}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium mt-3"
+            >
+              {testing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  测试中...
+                </>
+              ) : (
+                <>
+                  <TestTube className="w-4 h-4" />
+                  测试默认模型连接
+                </>
+              )}
+            </button>
+          </>
         )}
       </div>
     </div>
