@@ -10,6 +10,7 @@ import AIAssistant from '@/components/AIAssistant';
 import Navbar from '@/components/Navbar';
 import PasswordModal from '@/components/PasswordModal';
 import RankingsSection from '@/components/RankingsSection';
+import ToolRankingsSection from '@/components/ToolRankingsSection';
 import { PageSkeleton } from '@/components/SkeletonLoader';
 
 interface Site {
@@ -46,6 +47,7 @@ interface Config {
   siteDescriptionFontSize?: number;
   showDescriptionOnHover?: boolean;
   showTools?: boolean;
+  showToolRankings?: boolean;
 }
 
 export default function Home() {
@@ -265,7 +267,12 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 pb-24">
         {/* 排行榜区域 - 仅在未搜索时显示 */}
-        {!searchQuery && <RankingsSection />}
+        {!searchQuery && (
+          <>
+            <RankingsSection />
+            {config.showToolRankings && <ToolRankingsSection />}
+          </>
+        )}
 
 
         {/* 搜索结果展示 */}

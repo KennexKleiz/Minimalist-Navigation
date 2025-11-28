@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { ThumbsUp, Eye } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import axios from 'axios';
 
@@ -13,6 +14,8 @@ interface Tool {
   code: string;
   icon: string | null;
   categoryId: number;
+  likes: number;
+  views: number;
 }
 
 export default function ToolDetailPage() {
@@ -25,12 +28,35 @@ export default function ToolDetailPage() {
   const [config, setConfig] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [likes, setLikes] = useState(0);
+  const [views, setViews] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const hasRecordedView = useRef(false);
 
   useEffect(() => {
     fetchTool();
     fetchNavCategories();
     fetchConfig();
   }, [toolId]);
+
+  useEffect(() => {
+    if (tool) {
+      setLikes(tool.likes || 0);
+      setViews(tool.views || 0);
+
+      // 检查是否已点赞
+      const likedStatus = localStorage.getItem(`tool_liked_${tool.id}`);
+      if (likedStatus === 'true') {
+        setIsLiked(true);
+      }
+
+      // 记录浏览 - 使用 ref 确保只记录一次
+      if (!hasRecordedView.current) {
+        hasRecordedView.current = true;
+        handleView();
+      }
+    }
+  }, [tool]);
 
   const fetchTool = async () => {
     try {
@@ -43,6 +69,31 @@ export default function ToolDetailPage() {
       setError(error.response?.status === 404 ? '工具不存在' : '加载失败');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleView = async () => {
+    if (!tool) return;
+    try {
+      setViews(prev => prev + 1);
+      await axios.post('/api/tools/interact', { id: tool.id, type: 'view' });
+    } catch (error) {
+      console.error('Failed to record view', error);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!tool || isLiked) return;
+    try {
+      setLikes(prev => prev + 1);
+      setIsLiked(true);
+      localStorage.setItem(`tool_liked_${tool.id}`, 'true');
+      await axios.post('/api/tools/interact', { id: tool.id, type: 'like' });
+    } catch (error) {
+      console.error('Failed to like', error);
+      setIsLiked(false);
+      setLikes(prev => prev - 1);
+      localStorage.removeItem(`tool_liked_${tool.id}`);
     }
   };
 
@@ -127,10 +178,32 @@ export default function ToolDetailPage() {
                     {tool.name}
                   </h1>
                   {tool.description && (
-                    <p className="text-lg text-muted-foreground">
+                    <p className="text-lg text-muted-foreground mb-4">
                       {tool.description}
                     </p>
                   )}
+
+                  {/* 统计信息和点赞按钮 */}
+                  <div className="flex items-center justify-center gap-4 mt-6">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-full text-sm">
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{views}</span>
+                      <span className="text-muted-foreground">浏览</span>
+                    </div>
+                    <button
+                      onClick={handleLike}
+                      disabled={isLiked}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        isLiked
+                          ? 'bg-primary text-primary-foreground cursor-not-allowed'
+                          : 'bg-muted/50 hover:bg-primary/10 hover:text-primary'
+                      }`}
+                    >
+                      <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                      <span>{likes}</span>
+                      <span>{isLiked ? '已推荐' : '推荐'}</span>
+                    </button>
+                  </div>
                 </>
               )}
             </motion.div>

@@ -62,7 +62,8 @@ export default function Dashboard() {
     siteTitleFontSize: 16,
     siteDescriptionFontSize: 12,
     showDescriptionOnHover: true,
-    showTools: false
+    showTools: false,
+    showToolRankings: true
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -686,6 +687,18 @@ export default function Dashboard() {
                   />
                   <label htmlFor="showTools" className="text-sm font-medium">
                     显示在线工具入口
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="showToolRankings"
+                    checked={config.showToolRankings}
+                    onChange={(e) => setConfig({ ...config, showToolRankings: e.target.checked })}
+                    className="rounded border-border"
+                  />
+                  <label htmlFor="showToolRankings" className="text-sm font-medium">
+                    显示首页小工具排行榜
                   </label>
                 </div>
               </div>

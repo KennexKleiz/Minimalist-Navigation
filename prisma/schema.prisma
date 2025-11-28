@@ -38,6 +38,7 @@ model SiteConfig {
   siteDescriptionFontSize Int      @default(12)
   showDescriptionOnHover  Boolean  @default(true)
   showTools           Boolean  @default(false)
+  showToolRankings    Boolean  @default(true)
   updatedAt           DateTime @updatedAt
 }
 
@@ -118,6 +119,19 @@ model Tool {
   categoryId  Int
   category    ToolCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   sortOrder   Int          @default(0)
+  likes       Int          @default(0)
+  views       Int          @default(0)
+  likesList   ToolLike[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+}
+
+model ToolLike {
+  id        Int      @id @default(autoincrement())
+  toolId    Int
+  ip        String
+  createdAt DateTime @default(now())
+  tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@unique([toolId, ip])
 }

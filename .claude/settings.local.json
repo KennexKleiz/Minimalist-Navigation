@@ -22,7 +22,13 @@
       "Bash(curl:*)",
       "Bash(npm install:*)",
       "Bash(npm pack:*)",
-      "Bash(tar:*)"
+      "Bash(tar:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(node test-db.js:*)",
+      "Bash(node -e:*)",
+      "Bash(node test-api-response.js:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(node test-config.js:*)"
     ],
     "deny": [],
     "ask": []
