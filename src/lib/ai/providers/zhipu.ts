@@ -11,11 +11,12 @@ import {
  * 智谱 AI 提供商适配器
  */
 export class ZhipuProvider extends BaseAIProvider {
-  private baseUrl: string;
-
   constructor(config: ProviderConfig) {
     super(config);
-    this.baseUrl = config.baseUrl || 'https://open.bigmodel.cn/api/paas/v4';
+    // 设置默认 baseUrl（如果未提供）
+    if (!this.baseUrl) {
+      this.baseUrl = 'https://open.bigmodel.cn/api/paas/v4';
+    }
   }
 
   async chat(messages: AIMessage[], options?: ChatOptions): Promise<AIResponse> {
